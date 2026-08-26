@@ -9,6 +9,8 @@ import br.com.sigrest.api.entity.Supplier;
 import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.SupplierRepository;
+import br.com.sigrest.api.util.Documentos;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +23,16 @@ public class SupplierController {
     @Autowired
     private SupplierRepository repository;
 
+    /** CNPJ e opcional; quando informado, o digito verificador precisa ser valido. */
+    private void validateCnpj(String cnpj) {
+        if (cnpj != null && !cnpj.isBlank() && !Documentos.isValidCNPJ(cnpj)) {
+            throw new BusinessException(ErrorCode.SUPP_CNPJ_INVALIDO);
+        }
+    }
+
     @PostMapping
-    public void saveSupplier(@RequestBody SupplierRequestDTO data) {
+    public void saveSupplier(@Valid @RequestBody SupplierRequestDTO data) {
+        validateCnpj(data.cnpj());
         Supplier supplier = new Supplier(data);
 
         if (data.street() != null || data.city() != null || data.uf() != null) {
@@ -58,7 +68,8 @@ public class SupplierController {
     }
 
     @PutMapping("/{id}")
-    public SupplierResponseDTO updateSupplier(@PathVariable Long id, @RequestBody SupplierRequestDTO data) {
+    public SupplierResponseDTO updateSupplier(@PathVariable Long id, @Valid @RequestBody SupplierRequestDTO data) {
+        validateCnpj(data.cnpj());
         Supplier supplier = repository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.SUPP_NAO_ENCONTRADO));
 

@@ -6,6 +6,9 @@ import { useAuth } from '../contexts/AuthContext';
 import CurrencyInput from './CurrencyInput';
 import { formatBRL } from '../utils/currency';
 import { CashRegister, CashMovement, CashMovementType } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import Modal from './ui/Modal';
 
 interface MovementForm {
   type: CashMovementType;
@@ -186,14 +189,14 @@ const CashRegisterForm = () => {
                 <div className="grid grid-cols-3 gap-3 mb-3">
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Tipo</label>
-                    <select
-                      className="input-field appearance-none"
+                    <Field
+                      as="select"
                       value={movement.type}
                       onChange={(e) => setMovement({ ...movement, type: e.target.value as CashMovementType })}
                     >
                       <option value="EXPENSE">Saída (Despesa)</option>
                       <option value="INCOME">Entrada</option>
-                    </select>
+                    </Field>
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Valor</label>
@@ -209,9 +212,8 @@ const CashRegisterForm = () => {
                   </div>
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-semibold text-ink-muted uppercase tracking-wider">Descrição</label>
-                    <input
+                    <Field
                       type="text"
-                      className="input-field"
                       value={movement.description}
                       onChange={(e) => setMovement({ ...movement, description: e.target.value })}
                       placeholder="Ex: Gás, aluguel..."
@@ -219,9 +221,14 @@ const CashRegisterForm = () => {
                     />
                   </div>
                 </div>
-                <button type="submit" disabled={submittingMovement || !movement.amount} className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
-                  {submittingMovement ? 'Registrando...' : 'Registrar'}
-                </button>
+                <Button
+                  type="submit"
+                  disabled={submittingMovement || !movement.amount}
+                  loading={submittingMovement}
+                  loadingText="Registrando..."
+                >
+                  Registrar
+                </Button>
               </form>
             </div>
 
@@ -277,45 +284,30 @@ const CashRegisterForm = () => {
                 />
               </div>
             </div>
-            <button
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            <Button
               onClick={handleOpenCashRegister}
               disabled={openingBalance === '' || openingBalance === null}
             >
               Abrir Caixa
-            </button>
+            </Button>
           </div>
         )}
       </div>
 
-      {openDialog && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="card p-6 max-w-md w-full mx-4">
-            <h3 className="text-base font-semibold text-ink mb-3">
-              {dialogAction === 'open' ? 'Confirmar Abertura de Caixa' : 'Confirmar Fechamento de Caixa'}
-            </h3>
-            <p className="text-sm text-ink-muted mb-6">
-              {dialogAction === 'open'
-                ? `Deseja realmente abrir o caixa com saldo inicial de R$ ${formatBRL(openingBalance)}?`
-                : `Deseja realmente fechar o caixa ${currentCashRegister?.id}?`}
-            </p>
-            <div className="flex justify-end gap-2">
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  setOpenDialog(false);
-                  setDialogAction(null);
-                }}
-              >
-                Cancelar
-              </button>
-              <button className="btn-primary" onClick={confirmAction}>
-                Confirmar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal
+        open={openDialog}
+        title={dialogAction === 'open' ? 'Confirmar Abertura de Caixa' : 'Confirmar Fechamento de Caixa'}
+        message={
+          dialogAction === 'open'
+            ? `Deseja realmente abrir o caixa com saldo inicial de R$ ${formatBRL(openingBalance)}?`
+            : `Deseja realmente fechar o caixa ${currentCashRegister?.id}?`
+        }
+        onCancel={() => {
+          setOpenDialog(false);
+          setDialogAction(null);
+        }}
+        onConfirm={confirmAction}
+      />
     </div>
   );
 };

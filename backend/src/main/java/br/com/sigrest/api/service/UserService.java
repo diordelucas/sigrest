@@ -4,6 +4,7 @@ import br.com.sigrest.api.entity.User;
 import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.UserRepository;
+import br.com.sigrest.api.service.audit.LogAtividadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,9 @@ public class UserService{
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private LogAtividadeService logAtividadeService;
 
     public User signUp(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -46,6 +50,8 @@ public class UserService{
             throw new BusinessException(ErrorCode.USER_ULTIMO_ADMIN);
         }
         userRepository.deleteById(id);
+        logAtividadeService.registrar("EXCLUIR_USUARIO", "User", id,
+                "Usuário removido: " + user.getEmail(), logAtividadeService.usuarioAtual());
     }
 }
 

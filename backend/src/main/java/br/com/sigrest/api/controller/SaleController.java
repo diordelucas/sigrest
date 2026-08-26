@@ -3,6 +3,7 @@ package br.com.sigrest.api.controller;
 import br.com.sigrest.api.dto.SaleRequestDTO;
 import br.com.sigrest.api.dto.SaleResponseDTO;
 import br.com.sigrest.api.service.SaleService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class SaleController {
     private SaleService saleService;
 
     @PostMapping
-    public ResponseEntity<SaleResponseDTO> createSale(@RequestBody SaleRequestDTO saleRequestDTO) {
+    public ResponseEntity<SaleResponseDTO> createSale(@Valid @RequestBody SaleRequestDTO saleRequestDTO) {
         SaleResponseDTO createdSale = saleService.createSale(saleRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSale);
     }

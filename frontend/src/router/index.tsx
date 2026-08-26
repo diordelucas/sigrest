@@ -1,4 +1,3 @@
-import React from 'react';
 import { createBrowserRouter, Navigate, useNavigate } from 'react-router-dom';
 
 // Layouts
@@ -45,9 +44,9 @@ import ProductionOrders from '../pages/ProductionOrders';
 const NewTechnicalSheetWrapper = () => {
   const navigate = useNavigate();
   return (
-    <TechnicalSheetForm 
-      onSaveSuccess={() => navigate('/technical-sheets')} 
-      onCancel={() => navigate('/technical-sheets')} 
+    <TechnicalSheetForm
+      onSaveSuccess={() => navigate('/technical-sheets')}
+      onCancel={() => navigate('/technical-sheets')}
     />
   );
 };
@@ -56,9 +55,9 @@ const NewTechnicalSheetWrapper = () => {
 const NewProductionOrderWrapper = () => {
   const navigate = useNavigate();
   return (
-    <ProductionOrderForm 
-      onSaveSuccess={() => navigate('/production-orders')} 
-      onCancel={() => navigate('/production-orders')} 
+    <ProductionOrderForm
+      onSaveSuccess={() => navigate('/production-orders')}
+      onCancel={() => navigate('/production-orders')}
     />
   );
 };

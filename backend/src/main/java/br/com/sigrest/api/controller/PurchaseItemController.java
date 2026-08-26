@@ -6,6 +6,7 @@ import br.com.sigrest.api.entity.PurchaseItem;
 import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.PurchaseItemRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class PurchaseItemController {
     private PurchaseItemRepository repository;
 
     @PostMapping
-    public void savePurchaseItem(@RequestBody PurchaseItemRequestDTO data){
+    public void savePurchaseItem(@Valid @RequestBody PurchaseItemRequestDTO data){
         PurchaseItem purchaseItemData = new PurchaseItem();
         purchaseItemData.setQuantity(data.getQuantity());
         purchaseItemData.setUnitPrice(data.getUnitPrice());

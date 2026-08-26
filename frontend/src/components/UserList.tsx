@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, RefreshCw, Search } from 'lucide-react';
 import api, { getErrorMessage } from '../services/api';
 import { User } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import Modal from './ui/Modal';
+import { Table, Th } from './ui/Table';
 
 interface UserListProps {
   refreshTrigger: number | boolean;
@@ -13,6 +17,7 @@ const UserList = ({ refreshTrigger, onEditUser }: UserListProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -28,13 +33,13 @@ const UserList = ({ refreshTrigger, onEditUser }: UserListProps) => {
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
-      try {
-        await api.delete(`/user/${id}`);
-        await fetchUsers();
-      } catch (error) {
-        setError(getErrorMessage(error, 'Erro ao excluir usuário.'));
-      }
+    try {
+      await api.delete(`/user/${id}`);
+      await fetchUsers();
+    } catch (error) {
+      setError(getErrorMessage(error, 'Erro ao excluir usuário.'));
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -64,12 +69,12 @@ const UserList = ({ refreshTrigger, onEditUser }: UserListProps) => {
         <h2 className="text-lg font-semibold text-ink">Lista de Usuários</h2>
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-          <input
+          <Field
             type="text"
             placeholder="Pesquisar..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-8 py-2 text-sm w-64"
+            className="pl-8 py-2 text-sm w-64"
           />
         </div>
       </div>
@@ -85,17 +90,14 @@ const UserList = ({ refreshTrigger, onEditUser }: UserListProps) => {
           {search ? `Nenhum resultado para "${search}".` : 'Nenhum usuário cadastrado.'}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <Table>
             <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Nome</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Email</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                  Nível de Acesso
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Ações</th>
+                <Th>ID</Th>
+                <Th>Nome</Th>
+                <Th>Email</Th>
+                <Th>Nível de Acesso</Th>
+                <Th>Ações</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -123,7 +125,7 @@ const UserList = ({ refreshTrigger, onEditUser }: UserListProps) => {
                       </button>
                       <button
                         className="px-3 py-1.5 text-xs bg-rose-500 text-white font-semibold rounded-lg hover:bg-rose-600 transition-colors flex items-center gap-1"
-                        onClick={() => handleDelete(user.id)}
+                        onClick={() => setConfirmDelete(user.id)}
                       >
                         <Trash2 size={12} /> Excluir
                       </button>
@@ -132,19 +134,24 @@ const UserList = ({ refreshTrigger, onEditUser }: UserListProps) => {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+        </Table>
       )}
 
       <div className="mt-4">
-        <button
-          className="btn-secondary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={fetchUsers}
-          disabled={loading}
-        >
+        <Button variant="secondary" onClick={fetchUsers} disabled={loading}>
           <RefreshCw size={14} /> Atualizar Lista
-        </button>
+        </Button>
       </div>
+
+      <Modal
+        open={confirmDelete !== null}
+        variant="danger"
+        title="Confirmar exclusão"
+        message="Tem certeza que deseja excluir este usuário?"
+        confirmLabel="Excluir"
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete !== null && handleDelete(confirmDelete)}
+      />
     </div>
   );
 };

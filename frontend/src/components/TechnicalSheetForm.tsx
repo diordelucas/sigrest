@@ -2,6 +2,9 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { ArrowLeft, Save, Plus, Trash2, Calculator } from 'lucide-react';
 import api, { getErrorMessage } from '../services/api';
 import { Product, TechnicalSheet, CostCalculation } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import { Table, Th } from './ui/Table';
 
 const UDM_OPTIONS = [
   { value: 'G', label: 'G' },
@@ -199,8 +202,7 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Nome da Receita / Ficha
             </label>
-            <input
-              className="input-field"
+            <Field
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -211,8 +213,8 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Produto Final (Marmita / Acabado)
             </label>
-            <select
-              className="input-field appearance-none"
+            <Field
+              as="select"
               value={finalProductId}
               onChange={(e) => setFinalProductId(e.target.value)}
               required
@@ -223,16 +225,15 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
                   {p.name}
                 </option>
               ))}
-            </select>
+            </Field>
           </div>
           <div className="flex flex-col gap-1">
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Rendimento (Porções)
             </label>
-            <input
+            <Field
               type="number"
               min="1"
-              className="input-field"
               value={rendimento}
               onChange={(e) => setRendimento(e.target.value)}
               placeholder="Ex: 10"
@@ -243,9 +244,9 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
 
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-sm font-semibold text-ink-muted uppercase tracking-wider">Insumos / Ingredientes</h3>
-          <button type="button" className="btn-secondary flex items-center gap-2" onClick={addItem}>
+          <Button type="button" variant="secondary" onClick={addItem}>
             <Plus size={14} /> Adicionar Insumo
-          </button>
+          </Button>
         </div>
 
         {items.length === 0 ? (
@@ -255,27 +256,20 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto mb-4">
-            <table className="w-full">
+          <Table className="mb-4">
               <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Insumo / Ingrediente
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider w-[230px]">
-                    Qtde / UDM
-                  </th>
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-ink-muted uppercase tracking-wider w-[80px]">
-                    Ações
-                  </th>
+                  <Th>Insumo / Ingrediente</Th>
+                  <Th className="w-[230px]">Qtde / UDM</Th>
+                  <Th className="text-center w-[80px]">Ações</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
                 {items.map((item, index) => (
                   <tr key={index} className="hover:bg-surface-2 transition-colors">
                     <td className="px-4 py-3">
-                      <select
-                        className="input-field appearance-none"
+                      <Field
+                        as="select"
                         value={item.rawMaterialId}
                         onChange={(e) => updateItem(index, 'rawMaterialId', e.target.value)}
                         required
@@ -289,22 +283,23 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
                               {p.purchaseUnit ? ` (${p.purchaseUnit})` : ''}
                             </option>
                           ))}
-                      </select>
+                      </Field>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
-                        <input
+                        <Field
                           type="number"
                           step="any"
                           min="0"
-                          className="input-field w-[110px]"
+                          className="w-[110px]"
                           value={item.quantity}
                           onChange={(e) => updateItem(index, 'quantity', e.target.value)}
                           placeholder="Ex: 250"
                           required
                         />
-                        <select
-                          className="input-field appearance-none w-[80px]"
+                        <Field
+                          as="select"
+                          className="w-[80px]"
                           value={item.unit}
                           onChange={(e) => updateItem(index, 'unit', e.target.value)}
                         >
@@ -314,7 +309,7 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
                               {u.label}
                             </option>
                           ))}
-                        </select>
+                        </Field>
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -330,8 +325,7 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+          </Table>
         )}
 
         <div className="border-t border-line my-6" />
@@ -341,12 +335,11 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Custo de Mão de Obra (%)
             </label>
-            <input
+            <Field
               type="number"
               step="0.01"
               min="0"
               max="100"
-              className="input-field"
               value={labourCostPercent}
               onChange={(e) => setLabourCostPercent(e.target.value)}
               placeholder="Ex: 30"
@@ -356,12 +349,11 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Despesas Variáveis (%)
             </label>
-            <input
+            <Field
               type="number"
               step="0.01"
               min="0"
               max="100"
-              className="input-field"
               value={variableExpensesPercent}
               onChange={(e) => setVariableExpensesPercent(e.target.value)}
               placeholder="Ex: 10"
@@ -372,12 +364,11 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Margem Desejada (%)
             </label>
-            <input
+            <Field
               type="number"
               step="0.01"
               min="0"
               max="100"
-              className="input-field"
               value={desiredMarginPercent}
               onChange={(e) => setDesiredMarginPercent(e.target.value)}
               placeholder="Ex: 20"
@@ -468,17 +459,13 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
         )}
 
         <div className="flex justify-end gap-2 mt-4">
-          <button type="button" className="btn-secondary" onClick={onCancel} disabled={loading}>
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={loading}>
             Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
+          </Button>
+          <Button type="submit" disabled={loading}>
             <Save size={14} />
             {loading ? 'Salvando...' : 'Salvar Ficha Técnica'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

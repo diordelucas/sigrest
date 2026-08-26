@@ -14,6 +14,7 @@ import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.ProductRepository;
 import br.com.sigrest.api.repository.PurchaseRepository;
 import br.com.sigrest.api.repository.SupplierRepository;
+import br.com.sigrest.api.service.audit.LogAtividadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,14 +38,30 @@ public class PurchaseService {
     @Autowired
     private StockMovementService stockMovementService;
 
+    @Autowired
+    private LogAtividadeService logAtividadeService;
+
     @Transactional
     public PurchaseResponseDTO createPurchase(PurchaseRequestDTO purchaseRequestDTO) {
+        String idempotencyKey = purchaseRequestDTO.getIdempotencyKey();
+        if (idempotencyKey != null && !idempotencyKey.isBlank()) {
+            var existing = purchaseRepository.findByIdempotencyKey(idempotencyKey);
+            if (existing.isPresent()) {
+                return convertToResponseDTO(existing.get());
+            }
+        }
+
         Purchase purchase = new Purchase();
         purchase.setDate(purchaseRequestDTO.getDate());
+        purchase.setIdempotencyKey(idempotencyKey);
 
         Supplier supplier = supplierRepository.findById(purchaseRequestDTO.getSupplierId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SUPP_NAO_ENCONTRADO));
         purchase.setSupplier(supplier);
+
+        // Salva o cabeçalho primeiro para ter o id real disponível na descrição das
+        // movimentações de estoque abaixo (senão "Compra #" + purchase.getId() sai como "Compra #null").
+        purchase = purchaseRepository.save(purchase);
 
         BigDecimal total = BigDecimal.ZERO;
         for (var itemDTO : purchaseRequestDTO.getItems()) {
@@ -69,6 +86,8 @@ public class PurchaseService {
         purchase.setTotal(total);
 
         Purchase savedPurchase = purchaseRepository.save(purchase);
+        logAtividadeService.registrar("CRIAR_COMPRA", "Purchase", savedPurchase.getId(),
+                "Total: " + savedPurchase.getTotal(), logAtividadeService.usuarioAtual());
         return convertToResponseDTO(savedPurchase);
     }
 

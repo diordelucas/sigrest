@@ -6,6 +6,7 @@ import br.com.sigrest.api.entity.City;
 import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.CityRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class CityController {
     private CityRepository repository;
 
     @PostMapping
-    public void saveCity(@RequestBody CityRequestDTO data){
+    public void saveCity(@Valid @RequestBody CityRequestDTO data){
         City cityData = new City();
         cityData.setName(data.name());
         cityData.setState(data.state());
@@ -39,7 +40,7 @@ public class CityController {
     }
 
     @PutMapping("/{id}")
-    public CityResponseDTO updateCity(@PathVariable Long id, @RequestBody CityRequestDTO data) {
+    public CityResponseDTO updateCity(@PathVariable Long id, @Valid @RequestBody CityRequestDTO data) {
         City city = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.CITY_NAO_ENCONTRADA));
         city.setName(data.name());
         city.setState(data.state());

@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { Sale } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import { Table, Th } from './ui/Table';
 
 const getPaymentMethodLabel = (method: string): string => {
   switch (method) {
@@ -68,17 +71,17 @@ const SaleList = () => {
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-            <input
+            <Field
               type="text"
               placeholder="Pesquisar cliente, pagamento..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-8 py-2 text-sm w-56"
+              className="pl-8 py-2 text-sm w-56"
             />
           </div>
-          <button className="btn-primary flex items-center gap-2" onClick={() => navigate('/sales/new')}>
+          <Button onClick={() => navigate('/sales/new')}>
             <Plus size={14} /> Nova Venda
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -88,21 +91,16 @@ const SaleList = () => {
             {search ? `Nenhum resultado para "${search}".` : 'Nenhuma venda encontrada.'}
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <Table>
               <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Data</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Cliente</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Pagamento
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Desconto
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">Total</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Ações</th>
+                  <Th>ID</Th>
+                  <Th>Data</Th>
+                  <Th>Cliente</Th>
+                  <Th>Pagamento</Th>
+                  <Th className="text-right">Desconto</Th>
+                  <Th className="text-right">Total</Th>
+                  <Th>Ações</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -129,8 +127,7 @@ const SaleList = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+          </Table>
         )}
       </div>
     </div>

@@ -11,6 +11,7 @@ import br.com.sigrest.api.repository.CashRegisterRepository;
 import br.com.sigrest.api.repository.PurchaseRepository;
 import br.com.sigrest.api.repository.SaleRepository;
 import br.com.sigrest.api.repository.UserRepository;
+import br.com.sigrest.api.service.audit.LogAtividadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,9 @@ public class CashRegisterService {
     @Autowired
     private PurchaseRepository purchaseRepository;
 
+    @Autowired
+    private LogAtividadeService logAtividadeService;
+
     @Transactional
     public CashRegisterResponseDTO openCashRegister(CashRegisterRequestDTO requestDTO) {
         if (cashRegisterRepository.findByIsOpenTrue().isPresent()) {
@@ -61,6 +65,8 @@ public class CashRegisterService {
         cashRegister.setOpen(true);
 
         CashRegister savedCashRegister = cashRegisterRepository.save(cashRegister);
+        logAtividadeService.registrar("ABRIR_CAIXA", "CashRegister", savedCashRegister.getId(),
+                "Caixa aberto com saldo inicial de " + savedCashRegister.getOpeningBalance(), openedBy);
         return convertToResponseDTO(savedCashRegister);
     }
 
@@ -93,6 +99,8 @@ public class CashRegisterService {
         );
 
         CashRegister updatedCashRegister = cashRegisterRepository.save(cashRegister);
+        logAtividadeService.registrar("FECHAR_CAIXA", "CashRegister", updatedCashRegister.getId(),
+                "Caixa fechado com saldo final de " + updatedCashRegister.getClosingBalance(), closedBy);
         return convertToResponseDTO(updatedCashRegister);
     }
 

@@ -4,6 +4,7 @@ import br.com.sigrest.api.dto.CostCalculationResponseDTO;
 import br.com.sigrest.api.dto.TechnicalSheetRequestDTO;
 import br.com.sigrest.api.dto.TechnicalSheetResponseDTO;
 import br.com.sigrest.api.service.TechnicalSheetService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class TechnicalSheetController {
     private TechnicalSheetService service;
 
     @PostMapping
-    public TechnicalSheetResponseDTO save(@RequestBody TechnicalSheetRequestDTO data) {
+    public TechnicalSheetResponseDTO save(@Valid @RequestBody TechnicalSheetRequestDTO data) {
         return service.save(data);
     }
 
@@ -38,7 +39,7 @@ public class TechnicalSheetController {
     }
 
     @PutMapping("/{id}")
-    public TechnicalSheetResponseDTO update(@PathVariable Long id, @RequestBody TechnicalSheetRequestDTO data) {
+    public TechnicalSheetResponseDTO update(@PathVariable Long id, @Valid @RequestBody TechnicalSheetRequestDTO data) {
         TechnicalSheetRequestDTO dto = new TechnicalSheetRequestDTO(
                 id, data.name(), data.finalProductId(), data.items(),
                 data.rendimento(), data.labourCostPercent(),

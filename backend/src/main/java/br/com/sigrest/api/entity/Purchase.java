@@ -30,5 +30,13 @@ public class Purchase {
 
     @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PurchaseItem> items = new ArrayList<>();
+
+    /**
+     * Chave de idempotência gerada pelo frontend por envio de formulário: reenvio da mesma
+     * compra (duplo clique, retry de rede) devolve o registro já criado em vez de duplicar
+     * (ver PLANO_ACAO_COMPLETO.md, item 8).
+     */
+    @Column(unique = true)
+    private String idempotencyKey;
 }
 

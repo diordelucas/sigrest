@@ -2,14 +2,18 @@ package br.com.sigrest.api.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Centraliza a tradução de exceções em respostas HTTP limpas, cada uma com um {@code codigo}
@@ -42,6 +46,35 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleParametroAusente(MissingServletRequestParameterException ex) {
         return responseFor(ErrorCode.GEN_PARAMETRO_AUSENTE);
+    }
+
+    /** Falha de {@code @Valid} nos DTOs de entrada — junta os campos inválidos numa mensagem única. */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidacao(MethodArgumentNotValidException ex) {
+        String mensagem = ex.getBindingResult().getFieldErrors().stream()
+                .map(erro -> erro.getField() + ": " + erro.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+        if (mensagem.isBlank()) {
+            mensagem = ErrorCode.GEN_VALIDACAO_FALHOU.getMensagemPadrao();
+        }
+        ErrorCode code = ErrorCode.GEN_VALIDACAO_FALHOU;
+        return ResponseEntity.status(code.getStatus())
+                .body(new ErrorResponse(code.getCodigo(), mensagem, code.getStatus().value()));
+    }
+
+    /**
+     * Conflito de lock otimista (ver {@code @Version} em {@code Product}): duas operações
+     * concorrentes tentaram alterar o mesmo registro. O cliente deve tentar novamente.
+     */
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleConcorrencia(ObjectOptimisticLockingFailureException ex) {
+        return responseFor(ErrorCode.STOCK_CONFLITO_CONCORRENCIA);
+    }
+
+    /** Violação de constraint do banco (ex.: índice único) que escapou da validação de negócio. */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleIntegridade(DataIntegrityViolationException ex) {
+        return responseFor(ErrorCode.GEN_CONFLITO_DADOS);
     }
 
     @ExceptionHandler(Exception.class)

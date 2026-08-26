@@ -15,6 +15,9 @@ import {
 } from 'recharts';
 import moment from 'moment';
 import { formatBRL } from '../utils/currency';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import { Table, Th } from './ui/Table';
 
 type ReportType =
   | ''
@@ -136,23 +139,14 @@ const ReportPage = () => {
         );
       case 'stock-movement':
         return (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <Table>
               <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Data/Hora
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Produto
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Tipo</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Quantidade
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Descrição
-                  </th>
+                  <Th>Data/Hora</Th>
+                  <Th>Produto</Th>
+                  <Th>Tipo</Th>
+                  <Th className="text-right">Quantidade</Th>
+                  <Th>Descrição</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -174,8 +168,7 @@ const ReportPage = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+          </Table>
         );
       case 'financial-flow':
         return (
@@ -193,20 +186,14 @@ const ReportPage = () => {
                 <Line type="monotone" dataKey="saldo" stroke="#6366f1" name="Saldo (R$)" strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full">
+            <div className="mt-4">
+              <Table>
                 <thead className="bg-surface-2 border-b border-line">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Mês</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                      Entradas
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                      Saídas
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                      Saldo
-                    </th>
+                    <Th>Mês</Th>
+                    <Th className="text-right">Entradas</Th>
+                    <Th className="text-right">Saídas</Th>
+                    <Th className="text-right">Saldo</Th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -229,26 +216,20 @@ const ReportPage = () => {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             </div>
           </div>
         );
       case 'purchase-history':
         return (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div>
+            <Table>
               <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Data</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Fornecedor
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Itens
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Total
-                  </th>
+                  <Th>Data</Th>
+                  <Th>Fornecedor</Th>
+                  <Th className="text-right">Itens</Th>
+                  <Th className="text-right">Total</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -263,7 +244,7 @@ const ReportPage = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </Table>
             {reportData.length === 0 && (
               <p className="text-sm text-ink-muted text-center py-8">Nenhuma compra registrada.</p>
             )}
@@ -288,8 +269,8 @@ const ReportPage = () => {
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Tipo de Relatório
             </label>
-            <select
-              className="input-field appearance-none"
+            <Field
+              as="select"
               value={reportType}
               onChange={(e) => setReportType(e.target.value as ReportType)}
             >
@@ -300,15 +281,14 @@ const ReportPage = () => {
               <option value="stock-movement">Movimentação de Estoque</option>
               <option value="financial-flow">Fluxo Financeiro</option>
               <option value="purchase-history">Histórico de Compras</option>
-            </select>
+            </Field>
           </div>
           <div className="flex flex-col gap-1">
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Data Inicial
             </label>
-            <input
+            <Field
               type="date"
-              className="input-field"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
             />
@@ -317,23 +297,18 @@ const ReportPage = () => {
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Data Final
             </label>
-            <input type="date" className="input-field" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            <Field type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </div>
           <div>
-            <button
-              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            <Button
+              className="w-full"
               onClick={handleGenerateReport}
               disabled={loading || !reportType}
+              loading={loading}
+              loadingText="Gerando..."
             >
-              {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Gerando...
-                </>
-              ) : (
-                'Gerar'
-              )}
-            </button>
+              Gerar
+            </Button>
           </div>
         </div>
 

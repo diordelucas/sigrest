@@ -3,6 +3,8 @@ import api, { getErrorMessage } from '../services/api';
 import toast from 'react-hot-toast';
 import CurrencyInput from './CurrencyInput';
 import { Category, Product, ProductType, UnitOfMeasure } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
 
 const TIPOS: { value: ProductType; label: string }[] = [
   { value: 'INSUMO', label: 'Insumo (Matéria-Prima)' },
@@ -138,9 +140,8 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Nome do Produto
             </label>
-            <input
+            <Field
               data-testid="product-name"
-              className="input-field"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -151,9 +152,8 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Código
             </label>
-            <input
+            <Field
               data-testid="product-code"
-              className="input-field"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               required
@@ -166,9 +166,9 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
           <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
             Categoria (Tipo de Produto)
           </label>
-          <select
+          <Field
+            as="select"
             data-testid="product-category"
-            className="input-field appearance-none"
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
             required
@@ -179,7 +179,7 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
                 {cat.name}
               </option>
             ))}
-          </select>
+          </Field>
         </div>
 
         <div className="border-t border-line my-4 flex items-center gap-3">
@@ -227,12 +227,12 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
               Estoque Atual{unit !== 'un' ? ` (${unit})` : ''}
             </label>
             <div className="relative">
-              <input
+              <Field
                 data-testid="product-storage"
                 type="number"
                 min="0"
                 step="any"
-                className="input-field pr-12"
+                className="pr-12"
                 value={storage}
                 onChange={(e) => setStorage(e.target.value)}
                 placeholder="0"
@@ -245,12 +245,12 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
               Estoque Mínimo{unit !== 'un' ? ` (${unit})` : ''}
             </label>
             <div className="relative">
-              <input
+              <Field
                 data-testid="product-minstorage"
                 type="number"
                 min="0"
                 step="any"
-                className="input-field pr-12"
+                className="pr-12"
                 value={minStorage}
                 onChange={(e) => setMinStorage(e.target.value)}
                 placeholder="0"
@@ -270,8 +270,8 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Tipo de Produto
             </label>
-            <select
-              className="input-field appearance-none"
+            <Field
+              as="select"
               value={tipo}
               onChange={(e) => setTipo(e.target.value)}
             >
@@ -281,7 +281,7 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
                   {t.label}
                 </option>
               ))}
-            </select>
+            </Field>
           </div>
 
           {tipo === 'INSUMO' && (
@@ -290,8 +290,8 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
                 <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                   Unidade de Compra (UDM)
                 </label>
-                <select
-                  className="input-field appearance-none"
+                <Field
+                  as="select"
                   value={purchaseUnit}
                   onChange={(e) => setPurchaseUnit(e.target.value)}
                 >
@@ -301,18 +301,17 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
                       {u.label}
                     </option>
                   ))}
-                </select>
+                </Field>
               </div>
 
               <div className="flex flex-col gap-1">
                 <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                   Qtde por Embalagem
                 </label>
-                <input
+                <Field
                   type="number"
                   step="any"
                   min="0"
-                  className="input-field"
                   value={packageQuantity}
                   onChange={(e) => setPackageQuantity(e.target.value)}
                   placeholder={purchaseUnit ? `Ex: 5 (5 ${purchaseUnit} por embalagem)` : 'Ex: 5'}
@@ -326,13 +325,13 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
         </div>
 
         <div className="flex gap-2">
-          <button type="submit" data-testid="product-submit" className="btn-primary">
+          <Button type="submit" data-testid="product-submit">
             {editingPerson ? 'Atualizar' : 'Cadastrar'}
-          </button>
+          </Button>
           {editingPerson && (
-            <button type="button" className="btn-secondary" onClick={handleCancel}>
+            <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancelar
-            </button>
+            </Button>
           )}
         </div>
       </form>

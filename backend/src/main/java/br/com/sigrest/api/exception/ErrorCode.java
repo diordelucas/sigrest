@@ -30,7 +30,9 @@ public enum ErrorCode {
 
     // Pessoas (clientes) e fornecedores
     PERSON_NAO_ENCONTRADA("SIGREST-PERSON-001", "Cliente não encontrado.", HttpStatus.NOT_FOUND),
+    PERSON_CPF_INVALIDO("SIGREST-PERSON-002", "CPF inválido.", HttpStatus.BAD_REQUEST),
     SUPP_NAO_ENCONTRADO("SIGREST-SUPP-001", "Fornecedor não encontrado.", HttpStatus.NOT_FOUND),
+    SUPP_CNPJ_INVALIDO("SIGREST-SUPP-002", "CNPJ inválido.", HttpStatus.BAD_REQUEST),
 
     // Endereço, cidade e estado
     ADDRESS_NAO_ENCONTRADO("SIGREST-GEO-001", "Endereço não encontrado.", HttpStatus.NOT_FOUND),
@@ -48,6 +50,7 @@ public enum ErrorCode {
     // Estoque
     STOCK_INSUFICIENTE("SIGREST-STOCK-001", "Estoque insuficiente para concluir esta operação.", HttpStatus.BAD_REQUEST),
     STOCK_MOVIMENTO_NAO_ENCONTRADO("SIGREST-STOCK-002", "Movimentação de estoque não encontrada.", HttpStatus.NOT_FOUND),
+    STOCK_CONFLITO_CONCORRENCIA("SIGREST-STOCK-003", "Este produto foi alterado por outra operação simultânea. Tente novamente.", HttpStatus.CONFLICT),
 
     // Ficha técnica
     TECH_FICHA_NAO_ENCONTRADA("SIGREST-TECH-001", "Ficha técnica não encontrada.", HttpStatus.NOT_FOUND),
@@ -75,6 +78,8 @@ public enum ErrorCode {
     // Genéricos / infraestrutura
     GEN_REQUISICAO_INVALIDA("SIGREST-GEN-001", "Requisição inválida. Confira os dados enviados.", HttpStatus.BAD_REQUEST),
     GEN_PARAMETRO_AUSENTE("SIGREST-GEN-002", "Parâmetro obrigatório ausente na requisição.", HttpStatus.BAD_REQUEST),
+    GEN_VALIDACAO_FALHOU("SIGREST-GEN-003", "Dados inválidos. Confira os campos destacados.", HttpStatus.BAD_REQUEST),
+    GEN_CONFLITO_DADOS("SIGREST-GEN-004", "Já existe um registro com esses dados.", HttpStatus.CONFLICT),
     GEN_ERRO_INTERNO("SIGREST-GEN-500", "Ocorreu um erro inesperado. Tente novamente em instantes.", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String codigo;

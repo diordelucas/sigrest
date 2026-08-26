@@ -1,6 +1,8 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import api, { getErrorMessage } from '../services/api';
 import { User, UserRole } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
 
 interface UserFormProps {
   onUserAdded: () => void;
@@ -69,8 +71,7 @@ const UserForm = ({ onUserAdded, editingUser, onEditComplete }: UserFormProps) =
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="flex flex-col gap-1">
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">Nome</label>
-            <input
-              className="input-field"
+            <Field
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -79,9 +80,8 @@ const UserForm = ({ onUserAdded, editingUser, onEditComplete }: UserFormProps) =
           </div>
           <div className="flex flex-col gap-1">
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">Email</label>
-            <input
+            <Field
               type="email"
-              className="input-field"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -93,9 +93,8 @@ const UserForm = ({ onUserAdded, editingUser, onEditComplete }: UserFormProps) =
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="flex flex-col gap-1">
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">Senha</label>
-            <input
+            <Field
               type="password"
-              className="input-field"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required={!editingUser}
@@ -106,25 +105,23 @@ const UserForm = ({ onUserAdded, editingUser, onEditComplete }: UserFormProps) =
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Nível de Acesso
             </label>
-            <select
-              className="input-field appearance-none"
+            <Field
+              as="select"
               value={role}
               onChange={(e) => setRole(e.target.value as UserRole)}
             >
               <option value="ADMIN">Administrador</option>
               <option value="OPERADOR">Operador</option>
-            </select>
+            </Field>
           </div>
         </div>
 
         <div className="flex gap-2">
-          <button type="submit" className="btn-primary">
-            {editingUser ? 'Atualizar' : 'Cadastrar'}
-          </button>
+          <Button type="submit">{editingUser ? 'Atualizar' : 'Cadastrar'}</Button>
           {editingUser && (
-            <button type="button" className="btn-secondary" onClick={handleCancel}>
+            <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancelar
-            </button>
+            </Button>
           )}
         </div>
       </form>

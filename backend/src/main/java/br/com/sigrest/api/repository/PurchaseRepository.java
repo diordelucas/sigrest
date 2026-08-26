@@ -8,9 +8,12 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Repository
 public interface PurchaseRepository extends JpaRepository<Purchase, Long> {
+
+    Optional<Purchase> findByIdempotencyKey(String idempotencyKey);
 
     @Query("SELECT COALESCE(SUM(p.total), 0) FROM Purchase p WHERE p.date BETWEEN :start AND :end")
     BigDecimal sumTotalBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);

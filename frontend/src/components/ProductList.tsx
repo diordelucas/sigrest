@@ -4,6 +4,10 @@ import api, { getErrorMessage } from '../services/api';
 import CategoryTag from './CategoryTag';
 import { formatBRL } from '../utils/currency';
 import { Product } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import Modal from './ui/Modal';
+import { Table, Th } from './ui/Table';
 
 const baseUnitOf = (purchaseUnit: string | null): string => {
   if (!purchaseUnit) return 'un.';
@@ -23,6 +27,7 @@ const ProductList = ({ refreshTrigger, onEditPerson, isReadOnly }: ProductListPr
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const fetchProducts = async () => {
     try {
@@ -38,13 +43,13 @@ const ProductList = ({ refreshTrigger, onEditPerson, isReadOnly }: ProductListPr
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
-      try {
-        await api.delete(`/product/${id}`);
-        setProducts(products.filter((product) => product.id !== id));
-      } catch (error) {
-        setError(getErrorMessage(error, 'Erro ao excluir produto.'));
-      }
+    try {
+      await api.delete(`/product/${id}`);
+      setProducts(products.filter((product) => product.id !== id));
+    } catch (error) {
+      setError(getErrorMessage(error, 'Erro ao excluir produto.'));
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -74,12 +79,12 @@ const ProductList = ({ refreshTrigger, onEditPerson, isReadOnly }: ProductListPr
         <h2 className="text-lg font-semibold text-ink">Lista de Produtos</h2>
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-          <input
+          <Field
             type="text"
             placeholder="Pesquisar por nome, código..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-8 py-2 text-sm w-64"
+            className="pl-8 py-2 text-sm w-64"
           />
         </div>
       </div>
@@ -95,20 +100,17 @@ const ProductList = ({ refreshTrigger, onEditPerson, isReadOnly }: ProductListPr
           {search ? `Nenhum resultado para "${search}".` : 'Nenhum produto cadastrado.'}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <Table>
             <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Nome</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Categoria</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Código</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Preço Compra</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Preço Venda</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Estoque</th>
-                {!isReadOnly && (
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Ações</th>
-                )}
+                <Th>ID</Th>
+                <Th>Nome</Th>
+                <Th>Categoria</Th>
+                <Th>Código</Th>
+                <Th>Preço Compra</Th>
+                <Th>Preço Venda</Th>
+                <Th>Estoque</Th>
+                {!isReadOnly && <Th>Ações</Th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -144,7 +146,7 @@ const ProductList = ({ refreshTrigger, onEditPerson, isReadOnly }: ProductListPr
                         </button>
                         <button
                           className="px-3 py-1.5 text-xs bg-rose-500 text-white font-semibold rounded-lg hover:bg-rose-600 transition-colors flex items-center gap-1"
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => setConfirmDelete(product.id)}
                         >
                           <Trash2 size={12} /> Excluir
                         </button>
@@ -154,19 +156,29 @@ const ProductList = ({ refreshTrigger, onEditPerson, isReadOnly }: ProductListPr
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+        </Table>
       )}
 
       <div className="mt-4">
-        <button
-          className="btn-secondary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        <Button
+          variant="secondary"
+          className="disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={fetchProducts}
           disabled={loading}
         >
           <RefreshCw size={14} /> Atualizar Lista
-        </button>
+        </Button>
       </div>
+
+      <Modal
+        open={confirmDelete !== null}
+        variant="danger"
+        title="Confirmar exclusão"
+        message="Tem certeza que deseja excluir este produto?"
+        confirmLabel="Excluir"
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete !== null && handleDelete(confirmDelete)}
+      />
     </div>
   );
 };

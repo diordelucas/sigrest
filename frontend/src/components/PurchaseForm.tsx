@@ -1,8 +1,10 @@
-import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import React, { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api, { getErrorMessage } from '../services/api';
 import { Supplier, Product } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
 
 interface PurchaseItemForm {
   productId: string;
@@ -27,6 +29,10 @@ const PurchaseForm = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  // Identifica este envio de formulário: um retry de rede reenvia a mesma chave, então o
+  // backend devolve a compra já criada em vez de duplicá-la (ver PLANO_ACAO_COMPLETO.md, item 8).
+  const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,6 +87,8 @@ const PurchaseForm = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
     try {
       const purchaseToSubmit = {
         ...purchase,
@@ -90,11 +98,15 @@ const PurchaseForm = () => {
           quantity: parseInt(String(item.quantity), 10),
           unitPrice: parseFloat(String(item.unitPrice)),
         })),
+        idempotencyKey: idempotencyKeyRef.current,
       };
       await api.post('/purchases', purchaseToSubmit);
+      idempotencyKeyRef.current = crypto.randomUUID();
       navigate('/purchases');
     } catch (err) {
       setError(getErrorMessage(err, 'Erro ao registrar compra.'));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -130,10 +142,9 @@ const PurchaseForm = () => {
               <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                 Data da Compra
               </label>
-              <input
+              <Field
                 type="date"
                 name="date"
-                className="input-field"
                 value={purchase.date}
                 onChange={handlePurchaseChange}
                 required
@@ -143,9 +154,9 @@ const PurchaseForm = () => {
               <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                 Fornecedor
               </label>
-              <select
+              <Field
+                as="select"
                 name="supplierId"
-                className="input-field appearance-none"
                 value={purchase.supplierId}
                 onChange={handlePurchaseChange}
                 required
@@ -156,7 +167,7 @@ const PurchaseForm = () => {
                     {supplier.name}
                   </option>
                 ))}
-              </select>
+              </Field>
             </div>
           </div>
 
@@ -171,9 +182,10 @@ const PurchaseForm = () => {
                   <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                     Produto
                   </label>
-                  <select
+                  <Field
+                    as="select"
                     name="productId"
-                    className="input-field appearance-none bg-surface"
+                    className="bg-surface"
                     value={item.productId}
                     onChange={(e) => handleItemChange(index, e)}
                     required
@@ -185,17 +197,17 @@ const PurchaseForm = () => {
                         {product.categoryName ? ` · ${product.categoryName}` : ''}
                       </option>
                     ))}
-                  </select>
+                  </Field>
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                     Quantidade
                   </label>
-                  <input
+                  <Field
                     type="number"
                     name="quantity"
                     min="1"
-                    className="input-field bg-surface"
+                    className="bg-surface"
                     value={item.quantity}
                     onChange={(e) => handleItemChange(index, e)}
                     required
@@ -207,12 +219,12 @@ const PurchaseForm = () => {
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm font-medium">R$</span>
-                    <input
+                    <Field
                       type="number"
                       name="unitPrice"
                       step="0.01"
                       min="0"
-                      className="input-field pl-8 bg-surface"
+                      className="pl-8 bg-surface"
                       value={item.unitPrice}
                       onChange={(e) => handleItemChange(index, e)}
                       required
@@ -232,13 +244,9 @@ const PurchaseForm = () => {
             </div>
           ))}
 
-          <button
-            type="button"
-            className="btn-secondary flex items-center gap-2 mt-2"
-            onClick={handleAddItem}
-          >
+          <Button type="button" variant="secondary" className="mt-2" onClick={handleAddItem}>
             <Plus size={14} /> Adicionar Item
-          </button>
+          </Button>
 
           <div className="mt-6 text-right">
             <p className="text-base font-semibold text-ink">
@@ -248,12 +256,12 @@ const PurchaseForm = () => {
           </div>
 
           <div className="mt-6 flex justify-end gap-2">
-            <button type="submit" className="btn-primary">
+            <Button type="submit" disabled={submitting} loading={submitting} loadingText="Registrando...">
               Registrar Compra
-            </button>
-            <button type="button" className="btn-secondary" onClick={() => navigate('/purchases')}>
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => navigate('/purchases')} disabled={submitting}>
               Cancelar
-            </button>
+            </Button>
           </div>
         </form>
       </div>

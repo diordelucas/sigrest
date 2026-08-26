@@ -4,6 +4,7 @@ import br.com.sigrest.api.dto.CashRegisterRequestDTO;
 import br.com.sigrest.api.dto.CashRegisterResponseDTO;
 import br.com.sigrest.api.entity.User;
 import br.com.sigrest.api.service.CashRegisterService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class CashRegisterController {
 
     // Quem abre/fecha o caixa e quem esta autenticado — nao um id que o cliente informe.
     @PostMapping("/open")
-    public ResponseEntity<CashRegisterResponseDTO> openCashRegister(@RequestBody CashRegisterRequestDTO requestDTO,
+    public ResponseEntity<CashRegisterResponseDTO> openCashRegister(@Valid @RequestBody CashRegisterRequestDTO requestDTO,
                                                                       @AuthenticationPrincipal User currentUser) {
         requestDTO.setOpenedByUserId(currentUser.getId());
         CashRegisterResponseDTO openedCashRegister = cashRegisterService.openCashRegister(requestDTO);

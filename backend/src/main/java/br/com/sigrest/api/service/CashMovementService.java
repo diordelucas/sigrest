@@ -11,6 +11,7 @@ import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.CashMovementRepository;
 import br.com.sigrest.api.repository.CashRegisterRepository;
 import br.com.sigrest.api.repository.UserRepository;
+import br.com.sigrest.api.service.audit.LogAtividadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,9 @@ public class CashMovementService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private LogAtividadeService logAtividadeService;
 
     @Transactional
     public CashMovementResponseDTO createCashMovement(CashMovementRequestDTO requestDTO) {
@@ -53,6 +57,10 @@ public class CashMovementService {
         cashMovement.setUser(user);
 
         CashMovement savedMovement = cashMovementRepository.save(cashMovement);
+        logAtividadeService.registrar(
+                requestDTO.getType() == CashMovement.MovementType.INCOME ? "MOVIMENTO_CAIXA_ENTRADA" : "MOVIMENTO_CAIXA_SAIDA",
+                "CashMovement", savedMovement.getId(),
+                requestDTO.getDescription(), user);
         return convertToResponseDTO(savedMovement);
     }
 

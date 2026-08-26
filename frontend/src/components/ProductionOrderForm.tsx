@@ -2,6 +2,8 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { ArrowLeft, Save } from 'lucide-react';
 import api, { getErrorMessage } from '../services/api';
 import { TechnicalSheet } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
 
 interface ProductionOrderFormProps {
   onSaveSuccess: () => void;
@@ -76,8 +78,8 @@ const ProductionOrderForm = ({ onSaveSuccess, onCancel }: ProductionOrderFormPro
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Produto Final (com Ficha Técnica)
             </label>
-            <select
-              className="input-field appearance-none"
+            <Field
+              as="select"
               value={finalProductId}
               onChange={(e) => setFinalProductId(e.target.value)}
               required
@@ -88,17 +90,16 @@ const ProductionOrderForm = ({ onSaveSuccess, onCancel }: ProductionOrderFormPro
                   {s.finalProduct?.name} (Receita: {s.name})
                 </option>
               ))}
-            </select>
+            </Field>
           </div>
           <div className="flex flex-col gap-1">
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Quantidade a Produzir
             </label>
-            <input
+            <Field
               type="number"
               min="1"
               step="1"
-              className="input-field"
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               required
@@ -111,8 +112,8 @@ const ProductionOrderForm = ({ onSaveSuccess, onCancel }: ProductionOrderFormPro
           <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
             Observações (Lote, Perdas, Rendimento, etc)
           </label>
-          <textarea
-            className="input-field"
+          <Field
+            as="textarea"
             rows={4}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -121,17 +122,13 @@ const ProductionOrderForm = ({ onSaveSuccess, onCancel }: ProductionOrderFormPro
         </div>
 
         <div className="flex justify-end gap-2">
-          <button type="button" className="btn-secondary" onClick={onCancel} disabled={loading}>
+          <Button type="button" variant="secondary" onClick={onCancel} disabled={loading}>
             Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
+          </Button>
+          <Button type="submit" disabled={loading}>
             <Save size={14} />
             {loading ? 'Salvando...' : 'Abrir Ordem de Produção'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

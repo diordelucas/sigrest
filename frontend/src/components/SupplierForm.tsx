@@ -6,6 +6,8 @@ import api, { getErrorMessage } from '../services/api';
 import toast from 'react-hot-toast';
 import { CNPJ_MASK, PHONE_MASK, CEP_MASK } from '../utils/masks';
 import { Supplier } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
 
 interface SupplierFormProps {
   onSupplierAdded: () => void;
@@ -122,8 +124,7 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Nome / Razão Social
             </label>
-            <input
-              className="input-field"
+            <Field
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -159,9 +160,8 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               E-mail
             </label>
-            <input
+            <Field
               type="email"
-              className="input-field"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@exemplo.com"
@@ -171,8 +171,7 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Inscrição Estadual
             </label>
-            <input
-              className="input-field"
+            <Field
               value={registration}
               onChange={(e) => setRegistration(e.target.value)}
               placeholder="Inscrição Estadual"
@@ -209,8 +208,7 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Rua / Logradouro
             </label>
-            <input
-              className="input-field"
+            <Field
               value={street}
               onChange={(e) => setStreet(e.target.value)}
               placeholder="Rua, Avenida..."
@@ -220,8 +218,7 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Número
             </label>
-            <input
-              className="input-field"
+            <Field
               value={number}
               onChange={(e) => setNumber(e.target.value)}
               placeholder="Nº"
@@ -234,8 +231,7 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Bairro
             </label>
-            <input
-              className="input-field"
+            <Field
               value={nbhd}
               onChange={(e) => setNbhd(e.target.value)}
               placeholder="Bairro"
@@ -245,8 +241,7 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Cidade
             </label>
-            <input
-              className="input-field"
+            <Field
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder="Cidade"
@@ -254,8 +249,7 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
           </div>
           <div className="flex flex-col gap-1 w-[80px]">
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">UF</label>
-            <input
-              className="input-field"
+            <Field
               value={uf}
               onChange={(e) => setUf(e.target.value.toUpperCase())}
               maxLength={2}
@@ -265,20 +259,18 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
         </div>
 
         <div className="flex gap-2">
-          <button type="submit" className="btn-primary">
-            {editingSupplier ? 'Atualizar' : 'Cadastrar'}
-          </button>
+          <Button type="submit">{editingSupplier ? 'Atualizar' : 'Cadastrar'}</Button>
           {editingSupplier && (
-            <button
+            <Button
               type="button"
-              className="btn-secondary"
+              variant="secondary"
               onClick={() => {
                 clearForm();
                 onEditComplete();
               }}
             >
               Cancelar
-            </button>
+            </Button>
           )}
         </div>
       </form>

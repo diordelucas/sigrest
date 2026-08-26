@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api, { getErrorMessage } from '../services/api';
 import { Supplier } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
 
 interface AccountPayableFormState {
   description: string;
@@ -70,8 +72,7 @@ const AccountPayableForm = () => {
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Descrição
             </label>
-            <input
-              className="input-field"
+            <Field
               name="description"
               value={accountPayable.description}
               onChange={handleChange}
@@ -85,12 +86,12 @@ const AccountPayableForm = () => {
               <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">Valor</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm font-medium">R$</span>
-                <input
+                <Field
                   type="number"
                   name="amount"
                   step="0.01"
                   min="0"
-                  className="input-field pl-8"
+                  className="pl-8"
                   value={accountPayable.amount}
                   onChange={handleChange}
                   required
@@ -102,10 +103,9 @@ const AccountPayableForm = () => {
               <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                 Data de Vencimento
               </label>
-              <input
+              <Field
                 type="date"
                 name="dueDate"
-                className="input-field"
                 value={accountPayable.dueDate}
                 onChange={handleChange}
                 required
@@ -117,9 +117,9 @@ const AccountPayableForm = () => {
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Fornecedor
             </label>
-            <select
+            <Field
+              as="select"
               name="supplierId"
-              className="input-field appearance-none"
               value={accountPayable.supplierId}
               onChange={handleChange}
               required
@@ -130,32 +130,21 @@ const AccountPayableForm = () => {
                   {supplier.name}
                 </option>
               ))}
-            </select>
+            </Field>
           </div>
 
           <div className="flex justify-end gap-2">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {submitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Registrando...
-                </>
-              ) : (
-                'Registrar'
-              )}
-            </button>
-            <button
+            <Button type="submit" disabled={submitting} loading={submitting} loadingText="Registrando...">
+              Registrar
+            </Button>
+            <Button
               type="button"
-              className="btn-secondary"
+              variant="secondary"
               onClick={() => navigate('/accounts-payable')}
               disabled={submitting}
             >
               Cancelar
-            </button>
+            </Button>
           </div>
         </form>
       </div>

@@ -1,8 +1,17 @@
 package br.com.sigrest.api.dto;
 
 import br.com.sigrest.api.entity.Person;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
-public record PersonRequestDTO(Long id, String name, String cpf, String phone, String email, String street, String number, String nbhd, String city, String uf) {
+public record PersonRequestDTO(
+        Long id,
+        @NotBlank(message = "informe o nome") String name,
+        String cpf,
+        String phone,
+        @Email(message = "e-mail inválido") String email,
+        String street, String number, String nbhd, String city, String uf
+) {
     public PersonRequestDTO(Person person){
         this(
                 person.getId(),
@@ -19,4 +28,3 @@ public record PersonRequestDTO(Long id, String name, String cpf, String phone, S
         );
     }
 }
-

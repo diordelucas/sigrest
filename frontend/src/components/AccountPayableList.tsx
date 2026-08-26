@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { AccountPayable, AccountPayableStatus } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import { Table, Th } from './ui/Table';
 
 const getStatusBadge = (status: AccountPayableStatus | string) => {
   switch (status) {
@@ -90,17 +93,17 @@ const AccountPayableList = () => {
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-            <input
+            <Field
               type="text"
               placeholder="Pesquisar descrição, fornecedor..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-8 py-2 text-sm w-64"
+              className="pl-8 py-2 text-sm w-64"
             />
           </div>
-          <button className="btn-primary flex items-center gap-2" onClick={() => navigate('/accounts-payable/new')}>
+          <Button onClick={() => navigate('/accounts-payable/new')}>
             <Plus size={14} /> Nova Conta a Pagar
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -110,25 +113,16 @@ const AccountPayableList = () => {
             {search ? `Nenhum resultado para "${search}".` : 'Nenhuma conta a pagar encontrada.'}
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <Table>
               <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Descrição
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">Valor</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Vencimento
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Fornecedor
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Ações</th>
+                  <Th>ID</Th>
+                  <Th>Descrição</Th>
+                  <Th className="text-right">Valor</Th>
+                  <Th>Vencimento</Th>
+                  <Th>Fornecedor</Th>
+                  <Th>Status</Th>
+                  <Th>Ações</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -153,8 +147,7 @@ const AccountPayableList = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+          </Table>
         )}
       </div>
     </div>

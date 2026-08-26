@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Search } from 'lucide-react';
 import api, { getErrorMessage } from '../services/api';
 import { TechnicalSheet } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import Modal from './ui/Modal';
+import { Table, Th } from './ui/Table';
 
 interface TechnicalSheetListProps {
   refreshTrigger: number | boolean;
@@ -15,6 +19,7 @@ const TechnicalSheetList = ({ refreshTrigger, onEditSheet, onNewSheet, isReadOnl
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const fetchSheets = async () => {
     try {
@@ -30,13 +35,13 @@ const TechnicalSheetList = ({ refreshTrigger, onEditSheet, onNewSheet, isReadOnl
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja excluir esta ficha técnica?')) {
-      try {
-        await api.delete(`/technical-sheet/${id}`);
-        setSheets(sheets.filter((s) => s.id !== id));
-      } catch (err) {
-        setError(getErrorMessage(err, 'Erro ao excluir ficha técnica.'));
-      }
+    try {
+      await api.delete(`/technical-sheet/${id}`);
+      setSheets(sheets.filter((s) => s.id !== id));
+    } catch (err) {
+      setError(getErrorMessage(err, 'Erro ao excluir ficha técnica.'));
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -65,18 +70,18 @@ const TechnicalSheetList = ({ refreshTrigger, onEditSheet, onNewSheet, isReadOnl
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-            <input
+            <Field
               type="text"
               placeholder="Pesquisar..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-8 py-2 text-sm w-56"
+              className="pl-8 py-2 text-sm w-56"
             />
           </div>
           {!isReadOnly && (
-            <button className="btn-primary flex items-center gap-2" onClick={onNewSheet}>
+            <Button onClick={onNewSheet}>
               <Plus size={14} /> Nova Ficha Técnica
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -90,25 +95,14 @@ const TechnicalSheetList = ({ refreshTrigger, onEditSheet, onNewSheet, isReadOnl
           {search ? `Nenhum resultado para "${search}".` : 'Nenhuma ficha técnica cadastrada.'}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <Table>
             <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                  Nome da Receita
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                  Produto Final
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                  Qtd. de Insumos
-                </th>
-                {!isReadOnly && (
-                  <th className="px-4 py-3 text-center text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Ações
-                  </th>
-                )}
+                <Th>ID</Th>
+                <Th>Nome da Receita</Th>
+                <Th>Produto Final</Th>
+                <Th className="text-center">Qtd. de Insumos</Th>
+                {!isReadOnly && <Th className="text-center">Ações</Th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -136,7 +130,7 @@ const TechnicalSheetList = ({ refreshTrigger, onEditSheet, onNewSheet, isReadOnl
                         </button>
                         <button
                           className="p-1.5 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
-                          onClick={() => handleDelete(sheet.id)}
+                          onClick={() => setConfirmDelete(sheet.id)}
                           title="Excluir Ficha"
                         >
                           <Trash2 size={14} />
@@ -147,9 +141,18 @@ const TechnicalSheetList = ({ refreshTrigger, onEditSheet, onNewSheet, isReadOnl
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+        </Table>
       )}
+
+      <Modal
+        open={confirmDelete !== null}
+        variant="danger"
+        title="Confirmar exclusão"
+        message="Tem certeza que deseja excluir esta ficha técnica?"
+        confirmLabel="Excluir"
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete !== null && handleDelete(confirmDelete)}
+      />
     </div>
   );
 };

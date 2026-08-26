@@ -42,6 +42,14 @@ public class Product implements SoftDeletable {
     @Column(nullable = false)
     private boolean active = true;
 
+    /**
+     * Lock otimista: evita que duas vendas/compras simultâneas leiam o mesmo estoque,
+     * subtraiam/somem em paralelo e uma sobrescreva a outra (ver StockMovementService).
+     * A segunda transação a tentar salvar recebe {@link jakarta.persistence.OptimisticLockException}.
+     */
+    @Version
+    private Long version;
+
     public Product(ProductRequestDTO data){
         this.name = data.name();
         this.code = data.code();

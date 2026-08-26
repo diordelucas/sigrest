@@ -4,6 +4,7 @@ import br.com.sigrest.api.dto.ProductionOrderRequestDTO;
 import br.com.sigrest.api.dto.ProductionOrderResponseDTO;
 import br.com.sigrest.api.entity.ProductionOrder;
 import br.com.sigrest.api.service.ProductionOrderService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class ProductionOrderController {
     private ProductionOrderService service;
 
     @PostMapping
-    public ProductionOrderResponseDTO save(@RequestBody ProductionOrderRequestDTO data) {
+    public ProductionOrderResponseDTO save(@Valid @RequestBody ProductionOrderRequestDTO data) {
         return new ProductionOrderResponseDTO(service.save(data));
     }
 
@@ -33,7 +34,7 @@ public class ProductionOrderController {
     }
 
     @PutMapping("/{id}")
-    public ProductionOrderResponseDTO update(@PathVariable Long id, @RequestBody ProductionOrderRequestDTO data) {
+    public ProductionOrderResponseDTO update(@PathVariable Long id, @Valid @RequestBody ProductionOrderRequestDTO data) {
         ProductionOrderRequestDTO dto = new ProductionOrderRequestDTO(id, data.finalProductId(), data.quantity(), data.notes());
         return new ProductionOrderResponseDTO(service.save(dto));
     }

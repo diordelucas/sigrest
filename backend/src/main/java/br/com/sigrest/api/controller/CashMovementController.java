@@ -4,6 +4,7 @@ import br.com.sigrest.api.dto.CashMovementRequestDTO;
 import br.com.sigrest.api.dto.CashMovementResponseDTO;
 import br.com.sigrest.api.entity.User;
 import br.com.sigrest.api.service.CashMovementService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,7 @@ public class CashMovementController {
 
     // O responsavel pela movimentacao e quem esta autenticado — nao um id que o cliente informe.
     @PostMapping
-    public ResponseEntity<CashMovementResponseDTO> createCashMovement(@RequestBody CashMovementRequestDTO requestDTO,
+    public ResponseEntity<CashMovementResponseDTO> createCashMovement(@Valid @RequestBody CashMovementRequestDTO requestDTO,
                                                                         @AuthenticationPrincipal User currentUser) {
         requestDTO.setUserId(currentUser.getId());
         CashMovementResponseDTO createdMovement = cashMovementService.createCashMovement(requestDTO);
