@@ -63,7 +63,7 @@ const AccountReceivableForm = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div>
       <div className="card p-6 mb-6">
         <h2 className="text-lg font-semibold text-ink mb-6">Registrar Conta a Receber</h2>
 

@@ -14,6 +14,33 @@ interface KpiCardProps {
   accent: string;
 }
 
+interface ChartTooltipProps {
+  active?: boolean;
+  label?: string;
+  payload?: { name: string; value: number | string; color: string }[];
+  formatter?: (value: number | string) => string;
+}
+
+const ChartTooltip = ({ active, label, payload, formatter }: ChartTooltipProps) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="card px-3 py-2 shadow-xl text-xs min-w-[140px]">
+      {label && <p className="font-semibold text-ink mb-1.5">{label}</p>}
+      <div className="space-y-1">
+        {payload.map((p, i) => (
+          <p key={i} className="flex items-center justify-between gap-3 text-ink-muted">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: p.color }} />
+              {p.name}
+            </span>
+            <span className="font-semibold text-ink">{formatter ? formatter(p.value) : p.value}</span>
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const KpiCard = ({ icon, label, value, accent }: KpiCardProps) => (
   <div className="card p-5 flex items-center gap-4">
     <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${accent}`}>{icon}</div>
@@ -150,12 +177,32 @@ const Dashboard = () => {
           {monthlyRevenue.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={monthlyRevenue}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--color-line))" />
-                <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }} />
-                <YAxis tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }} />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="totalRevenue" stroke="#f97316" name="Faturamento (R$)" strokeWidth={2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--color-line))" vertical={false} />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }}
+                  axisLine={{ stroke: 'rgb(var(--color-line))' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ stroke: 'rgb(var(--color-primary-500))', strokeWidth: 1, strokeDasharray: '4 4' }}
+                  content={<ChartTooltip formatter={(v) => `R$ ${formatBRL(Number(v))}`} />}
+                />
+                <Legend wrapperStyle={{ fontSize: 12, color: 'rgb(var(--color-ink-muted))' }} />
+                <Line
+                  type="monotone"
+                  dataKey="totalRevenue"
+                  stroke="rgb(var(--color-primary-500))"
+                  name="Faturamento (R$)"
+                  strokeWidth={2.5}
+                  dot={{ r: 3, fill: 'rgb(var(--color-primary-500))', strokeWidth: 0 }}
+                  activeDot={{ r: 6, fill: 'rgb(var(--color-primary-500))', stroke: 'rgb(var(--color-surface))', strokeWidth: 2 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -169,13 +216,38 @@ const Dashboard = () => {
           </h3>
           {topSellingProducts.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topSellingProducts}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--color-line))" />
-                <XAxis dataKey="productName" tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }} />
-                <YAxis tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="totalQuantitySold" fill="#82ca9d" name="Quantidade Vendida" />
+              <BarChart data={topSellingProducts} barCategoryGap="30%">
+                <defs>
+                  <linearGradient id="topProductsBarFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgb(var(--color-primary-500))" stopOpacity={1} />
+                    <stop offset="100%" stopColor="rgb(var(--color-primary-500))" stopOpacity={0.55} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--color-line))" vertical={false} />
+                <XAxis
+                  dataKey="productName"
+                  tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }}
+                  axisLine={{ stroke: 'rgb(var(--color-line))' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  cursor={{ fill: 'rgb(var(--color-primary-500) / 0.08)', radius: 8 }}
+                  content={<ChartTooltip />}
+                />
+                <Legend wrapperStyle={{ fontSize: 12, color: 'rgb(var(--color-ink-muted))' }} />
+                <Bar
+                  dataKey="totalQuantitySold"
+                  fill="url(#topProductsBarFill)"
+                  name="Quantidade Vendida"
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={48}
+                />
               </BarChart>
             </ResponsiveContainer>
           ) : (
@@ -190,13 +262,41 @@ const Dashboard = () => {
           {salesByPeriod.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={salesByPeriod}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--color-line))" />
-                <XAxis dataKey="date" tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }} />
-                <YAxis tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }} />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="totalRevenue" stroke="#ffc658" name="Receita (R$)" strokeWidth={2} />
-                <Line type="monotone" dataKey="totalSales" stroke="#8884d8" name="Nº Vendas" strokeWidth={2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--color-line))" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }}
+                  axisLine={{ stroke: 'rgb(var(--color-line))' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: 'rgb(var(--color-ink-muted))' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ stroke: 'rgb(var(--color-primary-500))', strokeWidth: 1, strokeDasharray: '4 4' }}
+                  content={<ChartTooltip />}
+                />
+                <Legend wrapperStyle={{ fontSize: 12, color: 'rgb(var(--color-ink-muted))' }} />
+                <Line
+                  type="monotone"
+                  dataKey="totalRevenue"
+                  stroke="rgb(var(--color-primary-500))"
+                  name="Receita (R$)"
+                  strokeWidth={2.5}
+                  dot={{ r: 3, fill: 'rgb(var(--color-primary-500))', strokeWidth: 0 }}
+                  activeDot={{ r: 6, fill: 'rgb(var(--color-primary-500))', stroke: 'rgb(var(--color-surface))', strokeWidth: 2 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="totalSales"
+                  stroke="rgb(var(--color-ink-muted))"
+                  name="Nº Vendas"
+                  strokeWidth={2}
+                  dot={{ r: 3, fill: 'rgb(var(--color-ink-muted))', strokeWidth: 0 }}
+                  activeDot={{ r: 6, fill: 'rgb(var(--color-ink-muted))', stroke: 'rgb(var(--color-surface))', strokeWidth: 2 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           ) : (

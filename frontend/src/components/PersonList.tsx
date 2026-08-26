@@ -27,7 +27,7 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
       const response = await api.get<Person[]>('/person');
       setPersons(response.data);
     } catch (error) {
-      setError(getErrorMessage(error, 'Erro ao carregar a lista de pessoas.'));
+      setError(getErrorMessage(error, 'Erro ao carregar a lista de clientes.'));
     } finally {
       setLoading(false);
     }
@@ -38,7 +38,7 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
       await api.delete(`/person/${id}`);
       setPersons(persons.filter((person) => person.id !== id));
     } catch (error) {
-      setError(getErrorMessage(error, 'Erro ao excluir pessoa.'));
+      setError(getErrorMessage(error, 'Erro ao excluir cliente.'));
     } finally {
       setConfirmDelete(null);
     }
@@ -69,7 +69,7 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
   return (
     <div className="card p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-ink">Lista de Pessoas</h2>
+        <h2 className="text-lg font-semibold text-ink">Lista de Clientes</h2>
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
           <Field
@@ -90,7 +90,7 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
 
       {filtered.length === 0 ? (
         <p className="text-center text-ink-muted py-8 text-sm">
-          {search ? `Nenhum resultado para "${search}".` : 'Nenhuma pessoa cadastrada.'}
+          {search ? `Nenhum resultado para "${search}".` : 'Nenhum cliente cadastrado.'}
         </p>
       ) : (
         <Table>
@@ -161,7 +161,7 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
         open={confirmDelete !== null}
         variant="danger"
         title="Confirmar exclusão"
-        message="Tem certeza que deseja excluir esta pessoa?"
+        message="Tem certeza que deseja excluir este cliente?"
         confirmLabel="Excluir"
         onCancel={() => setConfirmDelete(null)}
         onConfirm={() => confirmDelete !== null && handleDelete(confirmDelete)}
