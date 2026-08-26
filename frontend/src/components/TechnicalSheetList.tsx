@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Search } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { TechnicalSheet } from '../types';
 
 interface TechnicalSheetListProps {
@@ -23,8 +23,7 @@ const TechnicalSheetList = ({ refreshTrigger, onEditSheet, onNewSheet, isReadOnl
       const response = await api.get<TechnicalSheet[]>('/technical-sheet');
       setSheets(response.data);
     } catch (err) {
-      console.error(err);
-      setError('Erro ao carregar fichas técnicas.');
+      setError(getErrorMessage(err, 'Erro ao carregar fichas técnicas.'));
     } finally {
       setLoading(false);
     }
@@ -36,8 +35,7 @@ const TechnicalSheetList = ({ refreshTrigger, onEditSheet, onNewSheet, isReadOnl
         await api.delete(`/technical-sheet/${id}`);
         setSheets(sheets.filter((s) => s.id !== id));
       } catch (err) {
-        console.error(err);
-        setError('Erro ao excluir ficha técnica.');
+        setError(getErrorMessage(err, 'Erro ao excluir ficha técnica.'));
       }
     }
   };

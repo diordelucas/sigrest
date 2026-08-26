@@ -7,6 +7,7 @@ import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.SellItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,6 +48,8 @@ public class SellItemController {
         return new SellItemResponseDTO(sellItem);
     }
 
+    /** Exclusao de item de venda e privilegio de administrador (mesmo padrao de ProductController). */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteSellItem(@PathVariable Long id) {
         SellItem sellItem = repository.findById(id)

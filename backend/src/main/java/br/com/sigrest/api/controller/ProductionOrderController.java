@@ -5,6 +5,7 @@ import br.com.sigrest.api.dto.ProductionOrderResponseDTO;
 import br.com.sigrest.api.entity.ProductionOrder;
 import br.com.sigrest.api.service.ProductionOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +43,8 @@ public class ProductionOrderController {
         return new ProductionOrderResponseDTO(service.finishProduction(id));
     }
 
+    /** Exclusao de ordem de producao e privilegio de administrador (mesmo padrao de ProductController). */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { ArrowLeft, Save, Plus, Trash2, Calculator } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { Product, TechnicalSheet, CostCalculation } from '../types';
 
 const UDM_OPTIONS = [
@@ -71,8 +71,7 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
       const response = await api.get<Product[]>('/product');
       setProducts(response.data);
     } catch (err) {
-      console.error('Erro ao carregar produtos:', err);
-      setError('Erro ao carregar lista de produtos.');
+      setError(getErrorMessage(err, 'Erro ao carregar lista de produtos.'));
     }
   };
 
@@ -83,8 +82,7 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
       const res = await api.get<CostCalculation>(`/technical-sheet/${sheetToEdit.id}/calculate-cost`);
       setCostResult(res.data);
     } catch (err) {
-      console.error('Erro ao calcular custos:', err);
-      setError('Erro ao calcular custos. Verifique se os insumos têm UDM e preço de custo cadastrados.');
+      setError(getErrorMessage(err, 'Erro ao calcular custos. Verifique se os insumos têm UDM e preço de custo cadastrados.'));
     } finally {
       setCalculatingCost(false);
     }
@@ -170,8 +168,7 @@ const TechnicalSheetForm = ({ sheetToEdit, onSaveSuccess, onCancel }: TechnicalS
       }
       onSaveSuccess();
     } catch (err) {
-      console.error(err);
-      setError('Erro ao salvar ficha técnica. Verifique se o produto final já possui uma ficha cadastrada.');
+      setError(getErrorMessage(err, 'Erro ao salvar ficha técnica. Verifique se o produto final já possui uma ficha cadastrada.'));
     } finally {
       setLoading(false);
     }

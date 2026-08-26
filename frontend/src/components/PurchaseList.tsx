@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { Purchase } from '../types';
 
@@ -17,8 +17,8 @@ const PurchaseList = () => {
       try {
         const response = await api.get<Purchase[]>('/purchases');
         setPurchases(response.data);
-      } catch (err: any) {
-        setError('Erro ao carregar compras: ' + err.message);
+      } catch (err) {
+        setError(getErrorMessage(err, 'Erro ao carregar compras.'));
       } finally {
         setLoading(false);
       }

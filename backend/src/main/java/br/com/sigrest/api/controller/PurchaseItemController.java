@@ -7,6 +7,7 @@ import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.PurchaseItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,6 +48,8 @@ public class PurchaseItemController {
         return dto;
     }
 
+    /** Exclusao de item de compra e privilegio de administrador (mesmo padrao de ProductController). */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deletePurchaseItem(@PathVariable Long id) {
         PurchaseItem purchaseItem = repository.findById(id)

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, RefreshCw, Search } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import CategoryTag from './CategoryTag';
 import { formatBRL } from '../utils/currency';
 import { Product } from '../types';
@@ -31,8 +31,7 @@ const ProductList = ({ refreshTrigger, onEditPerson, isReadOnly }: ProductListPr
       const response = await api.get<Product[]>('/product');
       setProducts(response.data);
     } catch (error) {
-      setError('Erro ao carregar a lista de produtos. Verifique o servidor.');
-      console.error(error);
+      setError(getErrorMessage(error, 'Erro ao carregar a lista de produtos.'));
     } finally {
       setLoading(false);
     }
@@ -44,8 +43,7 @@ const ProductList = ({ refreshTrigger, onEditPerson, isReadOnly }: ProductListPr
         await api.delete(`/product/${id}`);
         setProducts(products.filter((product) => product.id !== id));
       } catch (error) {
-        setError('Erro ao excluir produto. Verifique o servidor.');
-        console.error(error);
+        setError(getErrorMessage(error, 'Erro ao excluir produto.'));
       }
     }
   };

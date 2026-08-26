@@ -2,6 +2,7 @@ import React, { useState, FormEvent } from 'react';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { getErrorMessage } from '../services/api';
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,8 +23,7 @@ export default function LoginForm() {
       await signIn(email, password);
       navigate('/dashboard');
     } catch (err) {
-      console.error(err);
-      setError('Credenciais inválidas. Verifique seu e-mail e senha.');
+      setError(getErrorMessage(err, 'Não foi possível entrar. Tente novamente.'));
     } finally {
       setLoading(false);
     }

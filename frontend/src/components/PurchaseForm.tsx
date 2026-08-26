@@ -1,7 +1,7 @@
 import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { Supplier, Product } from '../types';
 
 interface PurchaseItemForm {
@@ -37,8 +37,8 @@ const PurchaseForm = () => {
         ]);
         setSuppliers(suppliersRes.data);
         setProducts(productsRes.data);
-      } catch (err: any) {
-        setError('Erro ao carregar dados: ' + err.message);
+      } catch (err) {
+        setError(getErrorMessage(err, 'Erro ao carregar dados.'));
       } finally {
         setLoading(false);
       }
@@ -93,8 +93,8 @@ const PurchaseForm = () => {
       };
       await api.post('/purchases', purchaseToSubmit);
       navigate('/purchases');
-    } catch (err: any) {
-      setError('Erro ao registrar compra: ' + err.message);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Erro ao registrar compra.'));
     }
   };
 

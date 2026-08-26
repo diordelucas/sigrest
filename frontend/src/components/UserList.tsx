@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, RefreshCw, Search } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { User } from '../types';
 
 interface UserListProps {
@@ -21,8 +21,7 @@ const UserList = ({ refreshTrigger, onEditUser }: UserListProps) => {
       const response = await api.get<User[]>('/user');
       setUsers(response.data);
     } catch (error) {
-      setError('Erro ao carregar a lista de usuários. Verifique o servidor.');
-      console.error(error);
+      setError(getErrorMessage(error, 'Erro ao carregar a lista de usuários.'));
     } finally {
       setLoading(false);
     }
@@ -33,9 +32,8 @@ const UserList = ({ refreshTrigger, onEditUser }: UserListProps) => {
       try {
         await api.delete(`/user/${id}`);
         await fetchUsers();
-      } catch (error: any) {
-        setError(error.response?.data?.message || 'Erro ao excluir usuário.');
-        console.error(error);
+      } catch (error) {
+        setError(getErrorMessage(error, 'Erro ao excluir usuário.'));
       }
     }
   };

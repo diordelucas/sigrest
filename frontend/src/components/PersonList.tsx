@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, RefreshCw, Search } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { Person } from '../types';
 
 interface PersonListProps {
@@ -22,8 +22,7 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
       const response = await api.get<Person[]>('/person');
       setPersons(response.data);
     } catch (error) {
-      setError('Erro ao carregar a lista de pessoas. Verifique o servidor.');
-      console.error(error);
+      setError(getErrorMessage(error, 'Erro ao carregar a lista de pessoas.'));
     } finally {
       setLoading(false);
     }
@@ -35,8 +34,7 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
         await api.delete(`/person/${id}`);
         setPersons(persons.filter((person) => person.id !== id));
       } catch (error) {
-        setError('Erro ao excluir pessoa. Verifique o servidor.');
-        console.error(error);
+        setError(getErrorMessage(error, 'Erro ao excluir pessoa.'));
       }
     }
   };

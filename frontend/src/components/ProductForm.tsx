@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import toast from 'react-hot-toast';
 import CurrencyInput from './CurrencyInput';
 import { Category, Product, ProductType, UnitOfMeasure } from '../types';
@@ -49,7 +49,7 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
     api
       .get<Category[]>('/category')
       .then((res) => setCategories(res.data))
-      .catch(() => toast.error('Erro ao carregar categorias.'));
+      .catch((err) => toast.error(getErrorMessage(err, 'Erro ao carregar categorias.')));
   }, []);
 
   useEffect(() => {
@@ -114,8 +114,8 @@ const ProductForm = ({ onUserAdded, editingPerson, onEditComplete }: ProductForm
         clearForm();
         onUserAdded();
       }
-    } catch {
-      toast.error(editingPerson ? 'Erro ao atualizar produto.' : 'Erro ao cadastrar produto.');
+    } catch (err) {
+      toast.error(getErrorMessage(err, editingPerson ? 'Erro ao atualizar produto.' : 'Erro ao cadastrar produto.'));
     }
   };
 
