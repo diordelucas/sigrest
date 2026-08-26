@@ -3,6 +3,7 @@ import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getErrorMessage } from '../services/api';
+import Field from './ui/Field';
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -47,12 +48,11 @@ export default function LoginForm() {
 
         <div className="space-y-1.5">
           <label className="text-sm font-semibold text-ink-muted">E-mail</label>
-          <input
+          <Field
             type="email"
             data-testid="login-email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="input-field"
             placeholder="admin@sigrest.com"
             required
           />
@@ -61,12 +61,12 @@ export default function LoginForm() {
         <div className="space-y-1.5">
           <label className="text-sm font-semibold text-ink-muted">Senha</label>
           <div className="relative">
-            <input
+            <Field
               type={showPassword ? 'text' : 'password'}
               data-testid="login-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="input-field pr-12"
+              className="pr-12"
               placeholder="••••••••"
               required
             />

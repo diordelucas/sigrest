@@ -6,6 +6,7 @@ import br.com.sigrest.api.entity.Category;
 import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.CategoryRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class CategoryController {
     private CategoryRepository repository;
 
     @PostMapping
-    public void saveCategory(@RequestBody CategoryRequestDTO data){
+    public void saveCategory(@Valid @RequestBody CategoryRequestDTO data){
         Category categoryData = new Category(data);
         repository.save(categoryData);
     }
@@ -36,7 +37,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public CategoryResponseDTO updateCategory(@PathVariable Long id, @RequestBody CategoryRequestDTO data) {
+    public CategoryResponseDTO updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequestDTO data) {
         Category category = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.CAT_NAO_ENCONTRADA));
         category.setName(data.name());
         category.setDescription(data.description());

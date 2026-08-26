@@ -3,6 +3,8 @@ import api, { getErrorMessage } from '../services/api';
 import CategoryTag from './CategoryTag';
 import { Search } from 'lucide-react';
 import { StockMovement } from '../types';
+import Field from './ui/Field';
+import { Table, Th } from './ui/Table';
 
 const StockMovementList = () => {
   const [movements, setMovements] = useState<StockMovement[]>([]);
@@ -48,12 +50,12 @@ const StockMovementList = () => {
         <h2 className="text-lg font-semibold text-ink">Histórico de Movimentações de Estoque</h2>
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-          <input
+          <Field
             type="text"
             placeholder="Pesquisar produto, descrição..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-8 py-2 text-sm w-64"
+            className="pl-8 py-2 text-sm w-64"
           />
         </div>
       </div>
@@ -64,24 +66,15 @@ const StockMovementList = () => {
             {search ? `Nenhum resultado para "${search}".` : 'Nenhuma movimentação de estoque encontrada.'}
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <Table>
               <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Data/Hora
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Produto
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Tipo</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Quantidade
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Descrição
-                  </th>
+                  <Th>ID</Th>
+                  <Th>Data/Hora</Th>
+                  <Th>Produto</Th>
+                  <Th>Tipo</Th>
+                  <Th className="text-right">Quantidade</Th>
+                  <Th>Descrição</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -109,8 +102,7 @@ const StockMovementList = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+          </Table>
         )}
       </div>
     </div>

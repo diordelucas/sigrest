@@ -6,6 +6,8 @@ import api, { getErrorMessage } from '../services/api';
 import toast from 'react-hot-toast';
 import { CPF_MASK, PHONE_MASK, CEP_MASK } from '../utils/masks';
 import { Person } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
 
 interface PersonFormProps {
   onUserAdded: () => void;
@@ -142,8 +144,7 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Nome Completo
             </label>
-            <input
-              className="input-field"
+            <Field
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -179,9 +180,8 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               E-mail
             </label>
-            <input
+            <Field
               type="email"
-              className="input-field"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@exemplo.com"
@@ -218,8 +218,7 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Rua / Logradouro
             </label>
-            <input
-              className="input-field"
+            <Field
               value={street}
               onChange={(e) => setStreet(e.target.value)}
               placeholder="Rua, Avenida..."
@@ -229,8 +228,7 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Número
             </label>
-            <input
-              className="input-field"
+            <Field
               value={number}
               onChange={(e) => setNumber(e.target.value)}
               placeholder="Nº"
@@ -243,8 +241,7 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Bairro
             </label>
-            <input
-              className="input-field"
+            <Field
               value={nbhd}
               onChange={(e) => setNbhd(e.target.value)}
               placeholder="Bairro"
@@ -254,8 +251,7 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Cidade
             </label>
-            <input
-              className="input-field"
+            <Field
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder="Cidade"
@@ -263,8 +259,7 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
           </div>
           <div className="flex flex-col gap-1 w-[80px]">
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">UF</label>
-            <input
-              className="input-field"
+            <Field
               value={uf}
               onChange={(e) => setUf(e.target.value.toUpperCase())}
               maxLength={2}
@@ -274,13 +269,11 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
         </div>
 
         <div className="flex gap-2">
-          <button type="submit" className="btn-primary">
-            {editingPerson ? 'Atualizar' : 'Cadastrar'}
-          </button>
+          <Button type="submit">{editingPerson ? 'Atualizar' : 'Cadastrar'}</Button>
           {editingPerson && (
-            <button type="button" className="btn-secondary" onClick={handleCancel}>
+            <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancelar
-            </button>
+            </Button>
           )}
         </div>
       </form>

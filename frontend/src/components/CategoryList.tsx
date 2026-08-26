@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Search } from 'lucide-react';
 import api, { getErrorMessage } from '../services/api';
 import { Category } from '../types';
+import Field from './ui/Field';
+import Modal from './ui/Modal';
+import { Table, Th } from './ui/Table';
 
 interface CategoryListProps {
   refreshTrigger: number | boolean;
@@ -14,6 +17,7 @@ const CategoryList = ({ refreshTrigger, onEditCategory, isReadOnly }: CategoryLi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const fetchCategories = async () => {
     try {
@@ -28,13 +32,13 @@ const CategoryList = ({ refreshTrigger, onEditCategory, isReadOnly }: CategoryLi
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Deseja excluir esta categoria?')) {
-      try {
-        await api.delete(`/category/${id}`);
-        setCategories(categories.filter((c) => c.id !== id));
-      } catch (error) {
-        setError(getErrorMessage(error, 'Erro ao excluir categoria.'));
-      }
+    try {
+      await api.delete(`/category/${id}`);
+      setCategories(categories.filter((c) => c.id !== id));
+    } catch (error) {
+      setError(getErrorMessage(error, 'Erro ao excluir categoria.'));
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -64,12 +68,12 @@ const CategoryList = ({ refreshTrigger, onEditCategory, isReadOnly }: CategoryLi
         <h2 className="text-lg font-semibold text-ink">Lista de Categorias</h2>
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-          <input
+          <Field
             type="text"
             placeholder="Pesquisar..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-8 py-2 text-sm w-64"
+            className="pl-8 py-2 text-sm w-64"
           />
         </div>
       </div>
@@ -85,16 +89,13 @@ const CategoryList = ({ refreshTrigger, onEditCategory, isReadOnly }: CategoryLi
           {search ? `Nenhum resultado para "${search}".` : 'Nenhuma categoria cadastrada.'}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <Table>
             <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Nome</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Descrição</th>
-                {!isReadOnly && (
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Ações</th>
-                )}
+                <Th>ID</Th>
+                <Th>Nome</Th>
+                <Th>Descrição</Th>
+                {!isReadOnly && <Th>Ações</Th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -114,7 +115,7 @@ const CategoryList = ({ refreshTrigger, onEditCategory, isReadOnly }: CategoryLi
                         </button>
                         <button
                           className="px-3 py-1.5 text-xs bg-rose-500 text-white font-semibold rounded-lg hover:bg-rose-600 transition-colors flex items-center gap-1"
-                          onClick={() => handleDelete(c.id)}
+                          onClick={() => setConfirmDelete(c.id)}
                         >
                           <Trash2 size={12} /> Excluir
                         </button>
@@ -124,9 +125,18 @@ const CategoryList = ({ refreshTrigger, onEditCategory, isReadOnly }: CategoryLi
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+        </Table>
       )}
+
+      <Modal
+        open={confirmDelete !== null}
+        variant="danger"
+        title="Confirmar exclusão"
+        message="Deseja excluir esta categoria?"
+        confirmLabel="Excluir"
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete !== null && handleDelete(confirmDelete)}
+      />
     </div>
   );
 };

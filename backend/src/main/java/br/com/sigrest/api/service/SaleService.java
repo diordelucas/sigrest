@@ -12,6 +12,7 @@ import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.PersonRepository;
 import br.com.sigrest.api.repository.ProductRepository;
 import br.com.sigrest.api.repository.SaleRepository;
+import br.com.sigrest.api.service.audit.LogAtividadeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,12 +37,23 @@ public class SaleService {
     @Autowired
     private StockMovementService stockMovementService;
 
+    @Autowired
+    private LogAtividadeService logAtividadeService;
+
     @Transactional
     public SaleResponseDTO createSale(SaleRequestDTO saleRequestDTO) {
+        if (saleRequestDTO.idempotencyKey() != null && !saleRequestDTO.idempotencyKey().isBlank()) {
+            var existing = saleRepository.findByIdempotencyKey(saleRequestDTO.idempotencyKey());
+            if (existing.isPresent()) {
+                return convertToResponseDTO(existing.get());
+            }
+        }
+
         Sale sale = new Sale();
         sale.setDate(new Date()); // Set current date for the sale
         sale.setDiscount(saleRequestDTO.discount());
         sale.setPaymentMethod(saleRequestDTO.paymentMethod());
+        sale.setIdempotencyKey(saleRequestDTO.idempotencyKey());
 
         if (saleRequestDTO.personId() != null) {
             Person person = personRepository.findById(saleRequestDTO.personId())
@@ -74,6 +86,8 @@ public class SaleService {
         sale.setTotal(total.subtract(BigDecimal.valueOf(sale.getDiscount()))); // Apply discount to total
 
         Sale savedSale = saleRepository.save(sale);
+        logAtividadeService.registrar("CRIAR_VENDA", "Sale", savedSale.getId(),
+                "Total: " + savedSale.getTotal(), logAtividadeService.usuarioAtual());
         return convertToResponseDTO(savedSale);
     }
 

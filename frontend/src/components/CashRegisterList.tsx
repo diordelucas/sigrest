@@ -3,6 +3,8 @@ import { Search } from 'lucide-react';
 import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { CashRegister } from '../types';
+import Field from './ui/Field';
+import { Table, Th } from './ui/Table';
 
 const CashRegisterList = () => {
   const [cashRegisters, setCashRegisters] = useState<CashRegister[]>([]);
@@ -48,12 +50,12 @@ const CashRegisterList = () => {
         <h2 className="text-lg font-semibold text-ink">Histórico de Caixas</h2>
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-          <input
+          <Field
             type="text"
             placeholder="Pesquisar usuário, status..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-8 py-2 text-sm w-64"
+            className="pl-8 py-2 text-sm w-64"
           />
         </div>
       </div>
@@ -64,32 +66,17 @@ const CashRegisterList = () => {
             {search ? `Nenhum resultado para "${search}".` : 'Nenhum caixa encontrado.'}
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <Table>
               <thead className="bg-surface-2 border-b border-line">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Abertura
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Fechamento
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Saldo Inicial
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Saldo Final
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Aberto por
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                    Fechado por
-                  </th>
+                  <Th>ID</Th>
+                  <Th>Abertura</Th>
+                  <Th>Fechamento</Th>
+                  <Th className="text-right">Saldo Inicial</Th>
+                  <Th className="text-right">Saldo Final</Th>
+                  <Th>Status</Th>
+                  <Th>Aberto por</Th>
+                  <Th>Fechado por</Th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -118,8 +105,7 @@ const CashRegisterList = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+          </Table>
         )}
       </div>
     </div>

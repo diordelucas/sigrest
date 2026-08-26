@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Search } from 'lucide-react';
 import api, { getErrorMessage } from '../services/api';
 import { Supplier } from '../types';
+import Field from './ui/Field';
+import Modal from './ui/Modal';
+import { Table, Th } from './ui/Table';
 
 interface SupplierListProps {
   refreshTrigger: number | boolean;
@@ -14,6 +17,7 @@ const SupplierList = ({ refreshTrigger, onEditSupplier, isReadOnly }: SupplierLi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const fetchSuppliers = async () => {
     try {
@@ -28,13 +32,13 @@ const SupplierList = ({ refreshTrigger, onEditSupplier, isReadOnly }: SupplierLi
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Deseja excluir este fornecedor?')) {
-      try {
-        await api.delete(`/supplier/${id}`);
-        setSuppliers(suppliers.filter((s) => s.id !== id));
-      } catch (error) {
-        setError(getErrorMessage(error, 'Erro ao excluir fornecedor.'));
-      }
+    try {
+      await api.delete(`/supplier/${id}`);
+      setSuppliers(suppliers.filter((s) => s.id !== id));
+    } catch (error) {
+      setError(getErrorMessage(error, 'Erro ao excluir fornecedor.'));
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -64,12 +68,12 @@ const SupplierList = ({ refreshTrigger, onEditSupplier, isReadOnly }: SupplierLi
         <h2 className="text-lg font-semibold text-ink">Lista de Fornecedores</h2>
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-          <input
+          <Field
             type="text"
             placeholder="Pesquisar por nome, CNPJ..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-8 py-2 text-sm w-64"
+            className="pl-8 py-2 text-sm w-64"
           />
         </div>
       </div>
@@ -85,17 +89,14 @@ const SupplierList = ({ refreshTrigger, onEditSupplier, isReadOnly }: SupplierLi
           {search ? `Nenhum resultado para "${search}".` : 'Nenhum fornecedor cadastrado.'}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <Table>
             <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Nome</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">CNPJ</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Email</th>
-                {!isReadOnly && (
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Ações</th>
-                )}
+                <Th>ID</Th>
+                <Th>Nome</Th>
+                <Th>CNPJ</Th>
+                <Th>Email</Th>
+                {!isReadOnly && <Th>Ações</Th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -116,7 +117,7 @@ const SupplierList = ({ refreshTrigger, onEditSupplier, isReadOnly }: SupplierLi
                         </button>
                         <button
                           className="px-3 py-1.5 text-xs bg-rose-500 text-white font-semibold rounded-lg hover:bg-rose-600 transition-colors flex items-center gap-1"
-                          onClick={() => handleDelete(s.id)}
+                          onClick={() => setConfirmDelete(s.id)}
                         >
                           <Trash2 size={12} /> Excluir
                         </button>
@@ -126,9 +127,18 @@ const SupplierList = ({ refreshTrigger, onEditSupplier, isReadOnly }: SupplierLi
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+        </Table>
       )}
+
+      <Modal
+        open={confirmDelete !== null}
+        variant="danger"
+        title="Confirmar exclusão"
+        message="Deseja excluir este fornecedor?"
+        confirmLabel="Excluir"
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete !== null && handleDelete(confirmDelete)}
+      />
     </div>
   );
 };

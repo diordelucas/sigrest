@@ -1,6 +1,8 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import api, { getErrorMessage } from '../services/api';
 import { Category } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
 
 interface CategoryFormProps {
   onCategoryAdded: () => void;
@@ -65,8 +67,7 @@ const CategoryForm = ({ onCategoryAdded, editingCategory, onEditComplete }: Cate
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div className="flex flex-col gap-1">
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">Nome</label>
-            <input
-              className="input-field"
+            <Field
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -77,8 +78,7 @@ const CategoryForm = ({ onCategoryAdded, editingCategory, onEditComplete }: Cate
             <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
               Descrição
             </label>
-            <input
-              className="input-field"
+            <Field
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Descrição (opcional)"
@@ -87,13 +87,11 @@ const CategoryForm = ({ onCategoryAdded, editingCategory, onEditComplete }: Cate
         </div>
 
         <div className="flex gap-2">
-          <button type="submit" className="btn-primary">
-            {editingCategory ? 'Atualizar' : 'Cadastrar'}
-          </button>
+          <Button type="submit">{editingCategory ? 'Atualizar' : 'Cadastrar'}</Button>
           {editingCategory && (
-            <button type="button" className="btn-secondary" onClick={handleCancel}>
+            <Button type="button" variant="secondary" onClick={handleCancel}>
               Cancelar
-            </button>
+            </Button>
           )}
         </div>
       </form>

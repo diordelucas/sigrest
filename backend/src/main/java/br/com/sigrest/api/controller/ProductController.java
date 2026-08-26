@@ -8,6 +8,7 @@ import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.CategoryRepository;
 import br.com.sigrest.api.repository.ProductRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public void saveProduct(@RequestBody ProductRequestDTO data){
+    public void saveProduct(@Valid @RequestBody ProductRequestDTO data){
         validateCategory(data.categoryId());
         Product productData = new Product(data);
         repository.save(productData);
@@ -63,7 +64,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ProductResponseDTO updatePerson(@PathVariable Long id, @RequestBody ProductRequestDTO data) {
+    public ProductResponseDTO updatePerson(@PathVariable Long id, @Valid @RequestBody ProductRequestDTO data) {
         validateCategory(data.categoryId());
 
         Product product = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO));

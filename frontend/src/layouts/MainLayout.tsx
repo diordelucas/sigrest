@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Search, Bell, User, Menu } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Sidebar from '../components/Sidebar';
 import ThemeSwitcher from '../components/ThemeSwitcher';
 import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 
 interface LowStockProduct {
   id: number;
@@ -26,7 +27,7 @@ export default function MainLayout() {
         const response = await api.get<LowStockProduct[]>('/product/low-stock');
         setLowStockAlerts(response.data);
       } catch (err) {
-        console.error('Erro ao buscar produtos com baixo estoque:', err);
+        toast.error(getErrorMessage(err, 'Não foi possível carregar os alertas de estoque.'));
       }
     };
     fetchLowStock();
@@ -42,7 +43,7 @@ export default function MainLayout() {
       )}
 
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 lg:w-auto transform transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

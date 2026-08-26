@@ -6,6 +6,7 @@ import br.com.sigrest.api.entity.Address;
 import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.AddressRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class AddressController {
     private AddressRepository repository;
 
     @PostMapping
-    public void saveAddres(@RequestBody AddressRequestDTO data){
+    public void saveAddres(@Valid @RequestBody AddressRequestDTO data){
         Address addressData = new Address();
         addressData.setStreet(data.street());
         addressData.setNumber(data.number());
@@ -41,7 +42,7 @@ public class AddressController {
     }
 
     @PutMapping("/{id}")
-    public AddressResponseDTO updateAddress(@PathVariable Long id, @RequestBody AddressRequestDTO data) {
+    public AddressResponseDTO updateAddress(@PathVariable Long id, @Valid @RequestBody AddressRequestDTO data) {
         Address address = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NAO_ENCONTRADO));
         address.setStreet(data.street());
         address.setNumber(data.number());

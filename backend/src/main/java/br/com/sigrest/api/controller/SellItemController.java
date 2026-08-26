@@ -6,6 +6,7 @@ import br.com.sigrest.api.entity.SellItem;
 import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.SellItemRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class SellItemController {
     private SellItemRepository repository;
 
     @PostMapping
-    public void saveSellItem(@RequestBody SellItemRequestDTO data){
+    public void saveSellItem(@Valid @RequestBody SellItemRequestDTO data){
         SellItem sellItemData = new SellItem(data);
         repository.save(sellItemData);
         return;
@@ -40,7 +41,7 @@ public class SellItemController {
     }
 
     @PutMapping("/{id}")
-    public SellItemResponseDTO updateSellItem(@PathVariable Long id, @RequestBody SellItemRequestDTO data) {
+    public SellItemResponseDTO updateSellItem(@PathVariable Long id, @Valid @RequestBody SellItemRequestDTO data) {
         SellItem sellItem = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.ITEM_VENDA_NAO_ENCONTRADO));
         sellItem.setQuantity(data.quantity());
         sellItem.setUnitPrice(data.unitPrice());

@@ -9,6 +9,8 @@ import br.com.sigrest.api.entity.State;
 import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.PersonRepository;
+import br.com.sigrest.api.util.Documentos;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +23,16 @@ public class PersonController {
     @Autowired
     private PersonRepository repository;
 
+    /** CPF e opcional; quando informado, o digito verificador precisa ser valido. */
+    private void validateCpf(String cpf) {
+        if (cpf != null && !cpf.isBlank() && !Documentos.isValidCPF(cpf)) {
+            throw new BusinessException(ErrorCode.PERSON_CPF_INVALIDO);
+        }
+    }
+
     @PostMapping
-    public void savePerson(@RequestBody PersonRequestDTO data){
+    public void savePerson(@Valid @RequestBody PersonRequestDTO data){
+        validateCpf(data.cpf());
         Person personData = new Person(data);
 
         // Criar e associar o endereÃ§o se os dados estiverem presentes
@@ -68,7 +78,8 @@ public class PersonController {
         }
 
     @PutMapping("/{id}")
-    public PersonResponseDTO updatePerson(@PathVariable Long id, @RequestBody PersonRequestDTO data) {
+    public PersonResponseDTO updatePerson(@PathVariable Long id, @Valid @RequestBody PersonRequestDTO data) {
+        validateCpf(data.cpf());
         Person person = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.PERSON_NAO_ENCONTRADA));
         person.setName(data.name());
         person.setCpf(data.cpf());

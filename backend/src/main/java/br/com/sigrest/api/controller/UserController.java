@@ -9,6 +9,7 @@ import br.com.sigrest.api.security.LoginRateLimiter;
 import br.com.sigrest.api.security.TokenService;
 import br.com.sigrest.api.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +34,7 @@ public class UserController {
     /** Criacao de usuario e privilegio de administrador — nao e mais um cadastro publico. */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/signup")
-    public ResponseEntity<UserResponseDTO> signup(@RequestBody UserRequestDTO dto){
+    public ResponseEntity<UserResponseDTO> signup(@Valid @RequestBody UserRequestDTO dto){
         User user = new User();
         user.setName(dto.name());
         user.setEmail(dto.email());
@@ -43,7 +44,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginDTO loginDTO, HttpServletRequest request){
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginDTO loginDTO, HttpServletRequest request){
         String key = rateLimiter.key(request.getRemoteAddr(), loginDTO.email());
         rateLimiter.checkBlocked(key);
         try {

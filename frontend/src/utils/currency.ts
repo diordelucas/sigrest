@@ -9,10 +9,10 @@
 
 /**
  * Formats a clean numeric value into the Brazilian masked string.
- * @param {number|string} value clean value, e.g. 1234.56
- * @returns {string} e.g. "1.234,56" (empty string when there is no value)
+ * @param value clean value, e.g. 1234.56
+ * @returns e.g. "1.234,56" (empty string when there is no value)
  */
-export const formatBRL = (value) => {
+export const formatBRL = (value: number | string | null | undefined): string => {
   if (value === '' || value === null || value === undefined) return '';
   const num = typeof value === 'number' ? value : Number(value);
   if (Number.isNaN(num)) return '';
@@ -29,10 +29,10 @@ export const formatBRL = (value) => {
  * Example: typing "1", "12", "123", "1234", "123456" yields
  *          0.01, 0.12, 1.23, 12.34, 1234.56
  *
- * @param {string} raw the raw input string (may contain dots, commas, R$, etc.)
- * @returns {number|''} clean numeric value, or '' when there are no digits
+ * @param raw the raw input string (may contain dots, commas, R$, etc.)
+ * @returns clean numeric value, or '' when there are no digits
  */
-export const parseBRLDigits = (raw) => {
+export const parseBRLDigits = (raw: string | null | undefined): number | '' => {
   const digits = String(raw ?? '').replace(/\D/g, '');
   if (!digits) return '';
   return parseInt(digits, 10) / 100;

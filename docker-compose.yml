@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -24,7 +24,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT:-8080}:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -36,12 +36,13 @@ services:
     container_name: sigrest_frontend
     restart: always
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT:-3000}:3000"
     depends_on:
       - backend
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WDS_SOCKET_PORT=0
+      - REACT_APP_API_URL=http://localhost:${BACKEND_PORT:-8080}
 
   maven:
     image: maven:3.9-eclipse-temurin-21

@@ -4,6 +4,10 @@ import toast from 'react-hot-toast';
 import api, { getErrorMessage } from '../services/api';
 import moment from 'moment';
 import { ProductionOrder, ProductionOrderStatus } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import Modal from './ui/Modal';
+import { Table, Th } from './ui/Table';
 
 const getStatusBadge = (status: ProductionOrderStatus | string) => {
   switch (status) {
@@ -45,6 +49,8 @@ const ProductionOrderList = ({ refreshTrigger, onNewOrder }: ProductionOrderList
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [search, setSearch] = useState('');
+  const [confirmFinish, setConfirmFinish] = useState<number | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const fetchOrders = async () => {
     try {
@@ -60,32 +66,28 @@ const ProductionOrderList = ({ refreshTrigger, onNewOrder }: ProductionOrderList
   };
 
   const handleFinish = async (id: number) => {
-    if (
-      window.confirm(
-        'Deseja realmente finalizar esta Ordem de Produção? Os estoques de insumos serão debitados e o produto acabado será creditado.'
-      )
-    ) {
-      try {
-        await api.post(`/production-order/${id}/finish`);
-        setSuccessMessage('Ordem de Produção finalizada com sucesso!');
-        setTimeout(() => setSuccessMessage(''), 4000);
-        fetchOrders();
-      } catch (err) {
-        toast.error(getErrorMessage(err, 'Erro ao finalizar ordem de produção.'));
-      }
+    try {
+      await api.post(`/production-order/${id}/finish`);
+      setSuccessMessage('Ordem de Produção finalizada com sucesso!');
+      setTimeout(() => setSuccessMessage(''), 4000);
+      fetchOrders();
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Erro ao finalizar ordem de produção.'));
+    } finally {
+      setConfirmFinish(null);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja excluir esta ordem de produção?')) {
-      try {
-        await api.delete(`/production-order/${id}`);
-        setOrders(orders.filter((o) => o.id !== id));
-        setSuccessMessage('Ordem de Produção excluída com sucesso!');
-        setTimeout(() => setSuccessMessage(''), 4000);
-      } catch (err) {
-        setError(getErrorMessage(err, 'Erro ao excluir ordem de produção.'));
-      }
+    try {
+      await api.delete(`/production-order/${id}`);
+      setOrders(orders.filter((o) => o.id !== id));
+      setSuccessMessage('Ordem de Produção excluída com sucesso!');
+      setTimeout(() => setSuccessMessage(''), 4000);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Erro ao excluir ordem de produção.'));
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -115,17 +117,17 @@ const ProductionOrderList = ({ refreshTrigger, onNewOrder }: ProductionOrderList
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-            <input
+            <Field
               type="text"
               placeholder="Pesquisar produto, status..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-8 py-2 text-sm w-56"
+              className="pl-8 py-2 text-sm w-56"
             />
           </div>
-          <button className="btn-primary flex items-center gap-2" onClick={onNewOrder}>
+          <Button onClick={onNewOrder}>
             <Plus size={14} /> Nova Ordem
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -143,27 +145,16 @@ const ProductionOrderList = ({ refreshTrigger, onNewOrder }: ProductionOrderList
           {search ? `Nenhum resultado para "${search}".` : 'Nenhuma ordem de produção cadastrada.'}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <Table>
             <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                  Produto Final
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-ink-muted uppercase tracking-wider">Qtd</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                  Data de Abertura
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                  Observações
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-ink-muted uppercase tracking-wider">
-                  Ações
-                </th>
+                <Th>ID</Th>
+                <Th>Produto Final</Th>
+                <Th className="text-center">Qtd</Th>
+                <Th>Data de Abertura</Th>
+                <Th>Status</Th>
+                <Th>Observações</Th>
+                <Th className="text-center">Ações</Th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -186,14 +177,14 @@ const ProductionOrderList = ({ refreshTrigger, onNewOrder }: ProductionOrderList
                       {order.status === 'OPEN' && (
                         <button
                           className="px-3 py-1.5 text-xs bg-emerald-500 text-white font-semibold rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-1"
-                          onClick={() => handleFinish(order.id)}
+                          onClick={() => setConfirmFinish(order.id)}
                         >
                           <CheckCircle2 size={12} /> Finalizar
                         </button>
                       )}
                       <button
                         className="p-1.5 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
-                        onClick={() => handleDelete(order.id)}
+                        onClick={() => setConfirmDelete(order.id)}
                         title="Excluir Ordem"
                       >
                         <Trash2 size={14} />
@@ -203,9 +194,27 @@ const ProductionOrderList = ({ refreshTrigger, onNewOrder }: ProductionOrderList
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+        </Table>
       )}
+
+      <Modal
+        open={confirmFinish !== null}
+        title="Finalizar ordem de produção"
+        message="Deseja realmente finalizar esta Ordem de Produção? Os estoques de insumos serão debitados e o produto acabado será creditado."
+        confirmLabel="Finalizar"
+        onCancel={() => setConfirmFinish(null)}
+        onConfirm={() => confirmFinish !== null && handleFinish(confirmFinish)}
+      />
+
+      <Modal
+        open={confirmDelete !== null}
+        variant="danger"
+        title="Confirmar exclusão"
+        message="Tem certeza que deseja excluir esta ordem de produção?"
+        confirmLabel="Excluir"
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete !== null && handleDelete(confirmDelete)}
+      />
     </div>
   );
 };

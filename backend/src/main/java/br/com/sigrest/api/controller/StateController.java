@@ -6,6 +6,7 @@ import br.com.sigrest.api.entity.State;
 import br.com.sigrest.api.exception.BusinessException;
 import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.StateRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +20,7 @@ public class StateController {
     private StateRepository repository;
 
     @PostMapping
-    public void saveState(@RequestBody StateRequestDTO data){
+    public void saveState(@Valid @RequestBody StateRequestDTO data){
         State stateData = new State();
         stateData.setName(data.name());
         stateData.setUf(data.uf());
@@ -39,7 +40,7 @@ public class StateController {
     }
 
     @PutMapping("/{id}")
-    public StateResponseDTO updateState(@PathVariable Long id, @RequestBody StateRequestDTO data) {
+    public StateResponseDTO updateState(@PathVariable Long id, @Valid @RequestBody StateRequestDTO data) {
         State state = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.STATE_NAO_ENCONTRADO));
         state.setName(data.name());
         state.setUf(data.uf());

@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, RefreshCw, Search } from 'lucide-react';
 import api, { getErrorMessage } from '../services/api';
 import { Person } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
+import Modal from './ui/Modal';
+import { Table, Th } from './ui/Table';
 
 interface PersonListProps {
   refreshTrigger: number | boolean;
@@ -14,6 +18,7 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   const fetchPersons = async () => {
     try {
@@ -29,13 +34,13 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
   };
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Tem certeza que deseja excluir esta pessoa?')) {
-      try {
-        await api.delete(`/person/${id}`);
-        setPersons(persons.filter((person) => person.id !== id));
-      } catch (error) {
-        setError(getErrorMessage(error, 'Erro ao excluir pessoa.'));
-      }
+    try {
+      await api.delete(`/person/${id}`);
+      setPersons(persons.filter((person) => person.id !== id));
+    } catch (error) {
+      setError(getErrorMessage(error, 'Erro ao excluir pessoa.'));
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -67,12 +72,12 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
         <h2 className="text-lg font-semibold text-ink">Lista de Pessoas</h2>
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none" />
-          <input
+          <Field
             type="text"
             placeholder="Pesquisar por nome, CPF, cidade..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input-field pl-8 py-2 text-sm w-72"
+            className="pl-8 py-2 text-sm w-72"
           />
         </div>
       </div>
@@ -88,21 +93,18 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
           {search ? `Nenhum resultado para "${search}".` : 'Nenhuma pessoa cadastrada.'}
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
+        <Table>
             <thead className="bg-surface-2 border-b border-line">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">ID</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Nome</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">CPF</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Telefone</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Email</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Endereço</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Cidade</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">UF</th>
-                {!isReadOnly && (
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-ink-muted uppercase tracking-wider">Ações</th>
-                )}
+                <Th>ID</Th>
+                <Th>Nome</Th>
+                <Th>CPF</Th>
+                <Th>Telefone</Th>
+                <Th>Email</Th>
+                <Th>Endereço</Th>
+                <Th>Cidade</Th>
+                <Th>UF</Th>
+                {!isReadOnly && <Th>Ações</Th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
@@ -131,7 +133,7 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
                         </button>
                         <button
                           className="px-3 py-1.5 text-xs bg-rose-500 text-white font-semibold rounded-lg hover:bg-rose-600 transition-colors flex items-center gap-1"
-                          onClick={() => handleDelete(person.id)}
+                          onClick={() => setConfirmDelete(person.id)}
                         >
                           <Trash2 size={12} /> Excluir
                         </button>
@@ -141,19 +143,29 @@ const PersonList = ({ refreshTrigger, onEditPerson, isReadOnly }: PersonListProp
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+        </Table>
       )}
 
       <div className="mt-4">
-        <button
-          className="btn-secondary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+        <Button
+          variant="secondary"
+          className="disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={fetchPersons}
           disabled={loading}
         >
           <RefreshCw size={14} /> Atualizar Lista
-        </button>
+        </Button>
       </div>
+
+      <Modal
+        open={confirmDelete !== null}
+        variant="danger"
+        title="Confirmar exclusão"
+        message="Tem certeza que deseja excluir esta pessoa?"
+        confirmLabel="Excluir"
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => confirmDelete !== null && handleDelete(confirmDelete)}
+      />
     </div>
   );
 };

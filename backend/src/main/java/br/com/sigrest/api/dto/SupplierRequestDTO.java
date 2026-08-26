@@ -1,14 +1,16 @@
 package br.com.sigrest.api.dto;
 
 import br.com.sigrest.api.entity.Supplier;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 public record SupplierRequestDTO(
         Long id,
-        String name,
+        @NotBlank(message = "informe o nome") String name,
         String phone,
         String registration,
         String cnpj,
-        String email,
+        @Email(message = "e-mail inválido") String email,
         String street,
         String number,
         String nbhd,

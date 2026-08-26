@@ -35,11 +35,20 @@ public class Sale {
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SellItem> items = new ArrayList<>();
 
+    /**
+     * Chave de idempotência gerada pelo frontend por envio de formulário: reenvio da mesma
+     * venda (duplo clique, retry de rede) devolve o registro já criado em vez de duplicar
+     * (ver PLANO_ACAO_COMPLETO.md, item 8).
+     */
+    @Column(unique = true)
+    private String idempotencyKey;
+
     public Sale(SaleRequestDTO data){
         this.date = data.date();
         this.total = data.total();
         this.discount = data.discount();
         this.paymentMethod = data.paymentMethod();
+        this.idempotencyKey = data.idempotencyKey();
     }
 }
 

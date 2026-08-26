@@ -1,10 +1,12 @@
-import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import React, { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { Person, Product } from '../types';
+import Button from './ui/Button';
+import Field from './ui/Field';
 
 const PAYMENT_METHODS = [
   { value: 'DINHEIRO', label: 'Dinheiro' },
@@ -38,6 +40,9 @@ const SaleForm = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  // Identifica este envio de formulário: um retry de rede reenvia a mesma chave, então o
+  // backend devolve a venda já criada em vez de duplicá-la (ver PLANO_ACAO_COMPLETO.md, item 8).
+  const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -110,8 +115,10 @@ const SaleForm = () => {
           quantity: parseInt(String(item.quantity), 10),
           unitPrice: parseFloat(String(item.unitPrice)),
         })),
+        idempotencyKey: idempotencyKeyRef.current,
       };
       await api.post('/sales', saleToSubmit);
+      idempotencyKeyRef.current = crypto.randomUUID();
       toast.success('Venda registrada com sucesso!');
       navigate('/sales');
     } catch (err) {
@@ -140,10 +147,10 @@ const SaleForm = () => {
               <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                 Cliente <span className="normal-case font-normal text-ink-muted">(opcional)</span>
               </label>
-              <select
+              <Field
+                as="select"
                 name="personId"
                 data-testid="sale-person"
-                className="input-field appearance-none"
                 value={sale.personId}
                 onChange={handleSaleChange}
               >
@@ -153,16 +160,16 @@ const SaleForm = () => {
                     {person.name}
                   </option>
                 ))}
-              </select>
+              </Field>
             </div>
             <div className="flex flex-col gap-1">
               <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                 Forma de Pagamento
               </label>
-              <select
+              <Field
+                as="select"
                 name="paymentMethod"
                 data-testid="sale-payment"
-                className="input-field appearance-none"
                 value={sale.paymentMethod}
                 onChange={handleSaleChange}
                 required
@@ -173,7 +180,7 @@ const SaleForm = () => {
                     {label}
                   </option>
                 ))}
-              </select>
+              </Field>
             </div>
             <div className="flex flex-col gap-1">
               <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
@@ -181,13 +188,13 @@ const SaleForm = () => {
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm font-medium">R$</span>
-                <input
+                <Field
                   type="number"
                   name="discount"
                   data-testid="sale-discount"
                   step="0.01"
                   min="0"
-                  className="input-field pl-8"
+                  className="pl-8"
                   value={sale.discount}
                   onChange={handleSaleChange}
                 />
@@ -206,10 +213,11 @@ const SaleForm = () => {
                   <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">
                     Produto
                   </label>
-                  <select
+                  <Field
+                    as="select"
                     name="productId"
                     data-testid="sale-item-product"
-                    className="input-field appearance-none bg-surface"
+                    className="bg-surface"
                     value={item.productId}
                     onChange={(e) => handleItemChange(index, e)}
                     required
@@ -222,16 +230,16 @@ const SaleForm = () => {
                         {product.storage <= product.minStorage ? ' ⚠' : ''}
                       </option>
                     ))}
-                  </select>
+                  </Field>
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="block text-xs font-semibold text-ink-muted uppercase tracking-wider mb-1">Qtd</label>
-                  <input
+                  <Field
                     type="number"
                     name="quantity"
                     data-testid="sale-item-qty"
                     min="1"
-                    className="input-field bg-surface"
+                    className="bg-surface"
                     value={item.quantity}
                     onChange={(e) => handleItemChange(index, e)}
                     required
@@ -243,12 +251,12 @@ const SaleForm = () => {
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted text-sm font-medium">R$</span>
-                    <input
+                    <Field
                       type="number"
                       name="unitPrice"
                       step="0.01"
                       min="0"
-                      className="input-field pl-8 bg-surface"
+                      className="pl-8 bg-surface"
                       value={item.unitPrice}
                       onChange={(e) => handleItemChange(index, e)}
                       required
@@ -268,14 +276,15 @@ const SaleForm = () => {
             </div>
           ))}
 
-          <button
+          <Button
             type="button"
+            variant="secondary"
             data-testid="sale-add-item"
-            className="btn-secondary flex items-center gap-2 mt-1"
+            className="mt-1"
             onClick={handleAddItem}
           >
             <Plus size={14} /> Adicionar Item
-          </button>
+          </Button>
 
           <div className="mt-4 bg-surface-2 border border-line rounded-xl p-4">
             <div className="flex flex-col items-end gap-1">
@@ -293,29 +302,23 @@ const SaleForm = () => {
           </div>
 
           <div className="mt-4 flex justify-end gap-2">
-            <button
+            <Button
               type="submit"
               data-testid="sale-submit"
               disabled={submitting}
-              className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              loading={submitting}
+              loadingText="Registrando..."
             >
-              {submitting ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Registrando...
-                </>
-              ) : (
-                'Registrar Venda'
-              )}
-            </button>
-            <button
+              Registrar Venda
+            </Button>
+            <Button
               type="button"
-              className="btn-secondary"
+              variant="secondary"
               onClick={() => navigate('/sales')}
               disabled={submitting}
             >
               Cancelar
-            </button>
+            </Button>
           </div>
         </form>
       </div>
