@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import {
   LayoutDashboard,
   Package,
@@ -69,7 +69,7 @@ const menuSections: MenuSection[] = [
   {
     title: 'Cadastros',
     entries: [
-      item({ icon: <Users size={20} />, label: 'Pessoas', path: '/people' }),
+      item({ icon: <Users size={20} />, label: 'Clientes', path: '/people' }),
       item({ icon: <Package size={20} />, label: 'Produtos', path: '/products' }),
       item({ icon: <Tags size={20} />, label: 'Categorias', path: '/categories' }),
       item({ icon: <Truck size={20} />, label: 'Fornecedores', path: '/suppliers' }),
@@ -145,19 +145,45 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     return localStorage.getItem(COLLAPSED_KEY) === '1';
   });
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
+  const closeTimeoutRef = useRef<number | null>(null);
+
+  const clearCloseTimeout = () => {
+    if (closeTimeoutRef.current !== null) {
+      window.clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  };
+
+  const openFlyout = (key: string) => {
+    clearCloseTimeout();
+    setHoveredGroup(key);
+  };
+
+  // Pequeno atraso antes de fechar: dá tempo do mouse cruzar o espaço até o
+  // popup sem perder o foco (o popup fica fora do fluxo normal, "flutuando"
+  // ao lado do ícone).
+  const scheduleCloseFlyout = (key: string) => {
+    clearCloseTimeout();
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setHoveredGroup((g) => (g === key ? null : g));
+    }, 350);
+  };
+
+  useEffect(() => clearCloseTimeout, []);
 
   useEffect(() => {
     localStorage.setItem(COLLAPSED_KEY, collapsed ? '1' : '0');
   }, [collapsed]);
 
-  // Abre automaticamente o grupo que contém a rota ativa (sem fechar os que o usuário já abriu).
+  // Abre automaticamente o grupo que contém a rota ativa, fechando qualquer outro aberto.
   useEffect(() => {
     for (const section of menuSections) {
       for (const entry of section.entries) {
         if (entry.kind === 'group' && entry.items.some((i) => i.path === location.pathname)) {
-          setOpenGroups((prev) => new Set(prev).add(entry.key));
+          setOpenGroup(entry.key);
+          return;
         }
       }
     }
@@ -177,12 +203,7 @@ const Sidebar = () => {
   );
 
   const toggleGroup = (key: string) => {
-    setOpenGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
+    setOpenGroup((prev) => (prev === key ? null : key));
   };
 
   const linkClasses = (isActive: boolean, compact = false) => `
@@ -257,15 +278,15 @@ const Sidebar = () => {
 
               const group = entry;
               const isGroupActive = group.items.some((i) => i.path === location.pathname);
-              const isOpen = openGroups.has(group.key);
+              const isOpen = openGroup === group.key;
 
               if (collapsed) {
                 return (
                   <div
                     key={group.key}
                     className="relative"
-                    onMouseEnter={() => setHoveredGroup(group.key)}
-                    onMouseLeave={() => setHoveredGroup((g) => (g === group.key ? null : g))}
+                    onMouseEnter={() => openFlyout(group.key)}
+                    onMouseLeave={() => scheduleCloseFlyout(group.key)}
                   >
                     <button
                       type="button"
@@ -275,7 +296,8 @@ const Sidebar = () => {
                       <span className="transition-transform duration-200 group-hover:scale-110">{group.icon}</span>
                     </button>
                     {hoveredGroup === group.key && (
-                      <div className="absolute left-full top-0 ml-2 w-56 card p-2 z-50 space-y-1">
+                      <div className="absolute left-full top-0 pl-2 w-60 z-50">
+                      <div className="card p-2 space-y-1">
                         <p className="px-2 py-1 text-xs font-semibold text-ink-muted uppercase tracking-wider">
                           {group.label}
                         </p>
@@ -289,6 +311,7 @@ const Sidebar = () => {
                             {renderItem(i)}
                           </React.Fragment>
                         ))}
+                      </div>
                       </div>
                     )}
                   </div>

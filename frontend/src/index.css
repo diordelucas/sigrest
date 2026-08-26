@@ -95,6 +95,36 @@
   body {
     @apply bg-canvas text-ink antialiased font-sans transition-colors duration-200;
   }
+
+  /* Scrollbar discreta e condizente com o tema, no lugar da barra cinza padrão do navegador. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--color-line)) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--color-line));
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--color-ink-muted));
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }
 
 @layer components {

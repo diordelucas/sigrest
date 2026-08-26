@@ -123,7 +123,7 @@ const PurchaseForm = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div>
       <div className="card p-6 mb-6">
         <div className="flex items-center gap-3 mb-6">
           <button

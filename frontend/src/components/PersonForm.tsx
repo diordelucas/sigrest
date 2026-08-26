@@ -113,17 +113,17 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
     try {
       if (editingPerson) {
         await api.put(`/person/${editingPerson.id}`, personData);
-        toast.success('Pessoa atualizada com sucesso!');
+        toast.success('Cliente atualizado com sucesso!');
         clearForm();
         onEditComplete();
       } else {
         await api.post('/person', personData);
-        toast.success('Pessoa cadastrada com sucesso!');
+        toast.success('Cliente cadastrado com sucesso!');
         clearForm();
         onUserAdded();
       }
     } catch (err) {
-      toast.error(getErrorMessage(err, editingPerson ? 'Erro ao atualizar pessoa.' : 'Erro ao cadastrar pessoa.'));
+      toast.error(getErrorMessage(err, editingPerson ? 'Erro ao atualizar cliente.' : 'Erro ao cadastrar cliente.'));
     }
   };
 
@@ -135,7 +135,7 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
   return (
     <div className="card p-6 mb-6">
       <h2 className="text-lg font-semibold text-ink mb-4">
-        {editingPerson ? 'Editar Pessoa' : 'Cadastro de Pessoa'}
+        {editingPerson ? 'Editar Cliente' : 'Cadastro de Cliente'}
       </h2>
 
       <form onSubmit={handleSubmit}>
