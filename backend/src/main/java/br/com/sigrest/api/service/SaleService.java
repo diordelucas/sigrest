@@ -61,6 +61,10 @@ public class SaleService {
             sale.setPerson(person);
         }
 
+        // Salva o cabeçalho primeiro para ter o id real disponível na descrição das
+        // movimentações de estoque abaixo (senão "Venda #" + sale.getId() sai como "Venda #null").
+        sale = saleRepository.save(sale);
+
         BigDecimal total = BigDecimal.ZERO;
         for (var itemDTO : saleRequestDTO.items()) {
             Product product = productRepository.findById(itemDTO.productId())

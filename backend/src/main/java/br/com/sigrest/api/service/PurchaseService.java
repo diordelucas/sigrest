@@ -59,6 +59,10 @@ public class PurchaseService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.SUPP_NAO_ENCONTRADO));
         purchase.setSupplier(supplier);
 
+        // Salva o cabeçalho primeiro para ter o id real disponível na descrição das
+        // movimentações de estoque abaixo (senão "Compra #" + purchase.getId() sai como "Compra #null").
+        purchase = purchaseRepository.save(purchase);
+
         BigDecimal total = BigDecimal.ZERO;
         for (var itemDTO : purchaseRequestDTO.getItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
