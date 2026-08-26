@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import {
   LineChart,
   Line,
@@ -82,8 +82,8 @@ const ReportPage = () => {
           setError('Selecione um tipo de relatório.');
           break;
       }
-    } catch (err: any) {
-      setError('Erro ao gerar relatório: ' + (err.response?.data?.message || err.message));
+    } catch (err) {
+      setError(getErrorMessage(err, 'Erro ao gerar relatório.'));
     } finally {
       setLoading(false);
     }

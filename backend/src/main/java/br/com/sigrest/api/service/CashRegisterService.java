@@ -6,12 +6,12 @@ import br.com.sigrest.api.dto.UserResponseDTO;
 import br.com.sigrest.api.entity.CashRegister;
 import br.com.sigrest.api.entity.User;
 import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.CashRegisterRepository;
 import br.com.sigrest.api.repository.PurchaseRepository;
 import br.com.sigrest.api.repository.SaleRepository;
 import br.com.sigrest.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,15 +44,15 @@ public class CashRegisterService {
     @Transactional
     public CashRegisterResponseDTO openCashRegister(CashRegisterRequestDTO requestDTO) {
         if (cashRegisterRepository.findByIsOpenTrue().isPresent()) {
-            throw new BusinessException("Já existe um caixa aberto. Feche o caixa atual antes de abrir um novo.", HttpStatus.CONFLICT);
+            throw new BusinessException(ErrorCode.CASH_JA_ABERTO);
         }
 
         if (requestDTO.getOpenedByUserId() == null) {
-            throw new BusinessException("Usuário responsável pela abertura não informado.", HttpStatus.BAD_REQUEST);
+            throw new BusinessException(ErrorCode.GEN_PARAMETRO_AUSENTE, "Usuário responsável pela abertura não informado.");
         }
 
         User openedBy = userRepository.findById(requestDTO.getOpenedByUserId())
-                .orElseThrow(() -> new BusinessException("Usuário responsável não encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NAO_ENCONTRADO));
 
         CashRegister cashRegister = new CashRegister();
         cashRegister.setOpeningTime(LocalDateTime.now());
@@ -67,14 +67,14 @@ public class CashRegisterService {
     @Transactional
     public CashRegisterResponseDTO closeCashRegister(Long cashRegisterId, Long closedByUserId) {
         CashRegister cashRegister = cashRegisterRepository.findById(cashRegisterId)
-                .orElseThrow(() -> new BusinessException("Caixa não encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CASH_NAO_ENCONTRADO));
 
         if (!cashRegister.isOpen()) {
-            throw new BusinessException("O caixa já está fechado.", HttpStatus.CONFLICT);
+            throw new BusinessException(ErrorCode.CASH_NAO_ABERTO);
         }
 
         User closedBy = userRepository.findById(closedByUserId)
-                .orElseThrow(() -> new BusinessException("Usuário responsável não encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NAO_ENCONTRADO));
 
         LocalDateTime closingTime = LocalDateTime.now();
         cashRegister.setClosingTime(closingTime);
@@ -113,7 +113,7 @@ public class CashRegisterService {
     @Transactional(readOnly = true)
     public CashRegisterResponseDTO getCashRegisterById(Long id) {
         CashRegister cashRegister = cashRegisterRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Caixa não encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CASH_NAO_ENCONTRADO));
         return convertToResponseDTO(cashRegister);
     }
 

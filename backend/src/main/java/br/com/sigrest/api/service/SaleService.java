@@ -7,6 +7,8 @@ import br.com.sigrest.api.entity.Person;
 import br.com.sigrest.api.entity.Product;
 import br.com.sigrest.api.entity.Sale;
 import br.com.sigrest.api.entity.SellItem;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.PersonRepository;
 import br.com.sigrest.api.repository.ProductRepository;
 import br.com.sigrest.api.repository.SaleRepository;
@@ -43,18 +45,18 @@ public class SaleService {
 
         if (saleRequestDTO.personId() != null) {
             Person person = personRepository.findById(saleRequestDTO.personId())
-                    .orElseThrow(() -> new RuntimeException("Cliente não encontrado."));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PERSON_NAO_ENCONTRADA));
             sale.setPerson(person);
         }
 
         BigDecimal total = BigDecimal.ZERO;
         for (var itemDTO : saleRequestDTO.items()) {
             Product product = productRepository.findById(itemDTO.productId())
-                    .orElseThrow(() -> new RuntimeException("Product not found: " + itemDTO.productId()));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO, "Produto não encontrado: " + itemDTO.productId()));
 
             BigDecimal currentStock = product.getStorage() != null ? product.getStorage() : java.math.BigDecimal.ZERO;
             if (currentStock.compareTo(itemDTO.quantity()) < 0) {
-                throw new RuntimeException("Estoque insuficiente para o produto: " + product.getName());
+                throw new BusinessException(ErrorCode.STOCK_INSUFICIENTE, "Estoque insuficiente para o produto: " + product.getName());
             }
 
             SellItem sellItem = new SellItem();
@@ -85,7 +87,7 @@ public class SaleService {
     @Transactional(readOnly = true)
     public SaleResponseDTO getSaleById(Long id) {
         Sale sale = saleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sale not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SALE_NAO_ENCONTRADA));
         return convertToResponseDTO(sale);
     }
 

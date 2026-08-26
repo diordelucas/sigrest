@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, CheckCircle2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { AccountPayable, AccountPayableStatus } from '../types';
 
@@ -47,8 +47,8 @@ const AccountPayableList = () => {
       try {
         const response = await api.get<AccountPayable[]>('/accounts-payable');
         setAccounts(response.data);
-      } catch (err: any) {
-        setError('Erro ao carregar contas a pagar: ' + err.message);
+      } catch (err) {
+        setError(getErrorMessage(err, 'Erro ao carregar contas a pagar.'));
       } finally {
         setLoading(false);
       }
@@ -60,8 +60,8 @@ const AccountPayableList = () => {
     try {
       await api.put(`/accounts-payable/pay/${id}`);
       setRefreshTrigger((prev) => prev + 1);
-    } catch (err: any) {
-      setError('Erro ao pagar conta: ' + (err.response?.data?.message || err.message));
+    } catch (err) {
+      setError(getErrorMessage(err, 'Erro ao pagar conta.'));
     }
   };
 

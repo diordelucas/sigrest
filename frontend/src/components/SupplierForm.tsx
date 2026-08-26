@@ -2,7 +2,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import { IMaskInput } from 'react-imask';
 import axios from 'axios'; // ViaCEP: API pública de terceiros, não deve levar o token de autenticação
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import toast from 'react-hot-toast';
 import { CNPJ_MASK, PHONE_MASK, CEP_MASK } from '../utils/masks';
 import { Supplier } from '../types';
@@ -105,8 +105,8 @@ const SupplierForm = ({ onSupplierAdded, editingSupplier, onEditComplete }: Supp
         clearForm();
         onSupplierAdded();
       }
-    } catch {
-      toast.error(editingSupplier ? 'Erro ao atualizar fornecedor.' : 'Erro ao cadastrar fornecedor.');
+    } catch (err) {
+      toast.error(getErrorMessage(err, editingSupplier ? 'Erro ao atualizar fornecedor.' : 'Erro ao cadastrar fornecedor.'));
     }
   };
 

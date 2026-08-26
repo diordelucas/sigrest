@@ -3,13 +3,13 @@ package br.com.sigrest.api.exception;
 import java.time.LocalDateTime;
 
 /**
- * Standard error payload returned to the frontend.
+ * Payload padrão de erro devolvido ao frontend.
  *
- * <p>The {@code message} field is consumed by the frontend (e.g.
- * {@code err.response.data.message}) to show a friendly toast/alert.
+ * <p>{@code codigo} identifica o erro de forma estável (ex. {@code SIGREST-PROD-001}) e é o que
+ * o suporte usa para localizar a causa raiz; {@code message} é o texto direto mostrado ao usuário.
  */
-public record ErrorResponse(String message, int status, LocalDateTime timestamp) {
-    public ErrorResponse(String message, int status) {
-        this(message, status, LocalDateTime.now());
+public record ErrorResponse(String codigo, String message, int status, LocalDateTime timestamp) {
+    public ErrorResponse(String codigo, String message, int status) {
+        this(codigo, message, status, LocalDateTime.now());
     }
 }

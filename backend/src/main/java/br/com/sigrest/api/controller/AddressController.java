@@ -3,6 +3,8 @@ package br.com.sigrest.api.controller;
 import br.com.sigrest.api.dto.AddressRequestDTO;
 import br.com.sigrest.api.dto.AddressResponseDTO;
 import br.com.sigrest.api.entity.Address;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.AddressRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,13 +36,13 @@ public class AddressController {
 
     @GetMapping("/{id}")
     public AddressResponseDTO getAddressById(@PathVariable Long id){
-        Address address = repository.findById(id).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
+        Address address = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NAO_ENCONTRADO));
         return new AddressResponseDTO(address);
     }
 
     @PutMapping("/{id}")
     public AddressResponseDTO updateAddress(@PathVariable Long id, @RequestBody AddressRequestDTO data) {
-        Address address = repository.findById(id).orElseThrow(() -> new RuntimeException("Endereço não encontrado"));
+        Address address = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NAO_ENCONTRADO));
         address.setStreet(data.street());
         address.setNumber(data.number());
         address.setNbhd(data.nbhd());
@@ -53,7 +55,9 @@ public class AddressController {
 
     @DeleteMapping("/{id}")
     public void deleteAddress(@PathVariable Long id) {
-        repository.deleteById(id);
+        Address address = repository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NAO_ENCONTRADO));
+        repository.delete(address);
     }
 }
 

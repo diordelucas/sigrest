@@ -3,6 +3,8 @@ package br.com.sigrest.api.controller;
 import br.com.sigrest.api.dto.CityRequestDTO;
 import br.com.sigrest.api.dto.CityResponseDTO;
 import br.com.sigrest.api.entity.City;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.CityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -32,13 +34,13 @@ public class CityController {
 
     @GetMapping("/{id}")
     public CityResponseDTO getCityById(@PathVariable Long id){
-        City city = repository.findById(id).orElseThrow(() -> new RuntimeException("Cidade nÃ£o encontrada"));
+        City city = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.CITY_NAO_ENCONTRADA));
         return new CityResponseDTO(city);
     }
 
     @PutMapping("/{id}")
     public CityResponseDTO updateCity(@PathVariable Long id, @RequestBody CityRequestDTO data) {
-        City city = repository.findById(id).orElseThrow(() -> new RuntimeException("Cidade nÃ£o encontrada"));
+        City city = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.CITY_NAO_ENCONTRADA));
         city.setName(data.name());
         city.setState(data.state());
         
@@ -49,7 +51,9 @@ public class CityController {
 
     @DeleteMapping("/{id}")
     public void deleteCity(@PathVariable Long id) {
-        repository.deleteById(id);
+        City city = repository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CITY_NAO_ENCONTRADA));
+        repository.delete(city);
     }
 }
 

@@ -3,8 +3,11 @@ package br.com.sigrest.api.controller;
 import br.com.sigrest.api.dto.SellItemRequestDTO;
 import br.com.sigrest.api.dto.SellItemResponseDTO;
 import br.com.sigrest.api.entity.SellItem;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.SellItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,22 +35,26 @@ public class SellItemController {
 
     @GetMapping("/{id}")
     public SellItemResponseDTO getSellItemById(@PathVariable Long id){
-        SellItem sellItem = repository.findById(id).orElseThrow(() -> new RuntimeException("Itens nÃ£o encontrados"));
+        SellItem sellItem = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.ITEM_VENDA_NAO_ENCONTRADO));
         return new SellItemResponseDTO(sellItem);
     }
 
     @PutMapping("/{id}")
     public SellItemResponseDTO updateSellItem(@PathVariable Long id, @RequestBody SellItemRequestDTO data) {
-        SellItem sellItem = repository.findById(id).orElseThrow(() -> new RuntimeException("Itens nÃ£o encontrados"));
+        SellItem sellItem = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.ITEM_VENDA_NAO_ENCONTRADO));
         sellItem.setQuantity(data.quantity());
         sellItem.setUnitPrice(data.unitPrice());
 
         return new SellItemResponseDTO(sellItem);
     }
 
+    /** Exclusao de item de venda e privilegio de administrador (mesmo padrao de ProductController). */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void deleteSellItem(@PathVariable Long id) {
-        repository.deleteById(id);
+        SellItem sellItem = repository.findById(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ITEM_VENDA_NAO_ENCONTRADO));
+        repository.delete(sellItem);
     }
 
     }

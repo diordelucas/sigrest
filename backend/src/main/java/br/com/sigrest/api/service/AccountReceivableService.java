@@ -5,6 +5,8 @@ import br.com.sigrest.api.dto.AccountReceivableResponseDTO;
 import br.com.sigrest.api.dto.PersonResponseDTO;
 import br.com.sigrest.api.entity.AccountReceivable;
 import br.com.sigrest.api.entity.Person;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.AccountReceivableRepository;
 import br.com.sigrest.api.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ public class AccountReceivableService {
     @Transactional
     public AccountReceivableResponseDTO createAccountReceivable(AccountReceivableRequestDTO requestDTO) {
         Person person = personRepository.findById(requestDTO.getPersonId())
-                .orElseThrow(() -> new RuntimeException("Pessoa (cliente) nÃ£o encontrada."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PERSON_NAO_ENCONTRADA));
 
         AccountReceivable accountReceivable = new AccountReceivable();
         accountReceivable.setDescription(requestDTO.getDescription());
@@ -43,10 +45,10 @@ public class AccountReceivableService {
     @Transactional
     public AccountReceivableResponseDTO receiveAccountReceivable(Long id) {
         AccountReceivable accountReceivable = accountReceivableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Conta a receber nÃ£o encontrada."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.REC_NAO_ENCONTRADA));
 
         if (accountReceivable.getStatus() == AccountReceivable.Status.RECEIVED) {
-            throw new RuntimeException("Esta conta jÃ¡ foi recebida.");
+            throw new BusinessException(ErrorCode.REC_JA_RECEBIDA);
         }
 
         accountReceivable.setReceiptDate(LocalDate.now());
@@ -66,7 +68,7 @@ public class AccountReceivableService {
     @Transactional(readOnly = true)
     public AccountReceivableResponseDTO getAccountReceivableById(Long id) {
         AccountReceivable accountReceivable = accountReceivableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Conta a receber não encontrada."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.REC_NAO_ENCONTRADA));
         return convertToResponseDTO(accountReceivable);
     }
 

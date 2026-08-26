@@ -3,6 +3,8 @@ package br.com.sigrest.api.controller;
 import br.com.sigrest.api.dto.CategoryRequestDTO;
 import br.com.sigrest.api.dto.CategoryResponseDTO;
 import br.com.sigrest.api.entity.Category;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,13 +31,13 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     public CategoryResponseDTO getCategoryById(@PathVariable Long id){
-        Category category = repository.findById(id).orElseThrow(() -> new RuntimeException("Categoria nÃ£o encontrada"));
+        Category category = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.CAT_NAO_ENCONTRADA));
         return new CategoryResponseDTO(category);
     }
 
     @PutMapping("/{id}")
     public CategoryResponseDTO updateCategory(@PathVariable Long id, @RequestBody CategoryRequestDTO data) {
-        Category category = repository.findById(id).orElseThrow(() -> new RuntimeException("Categoria nÃ£o encontrada"));
+        Category category = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.CAT_NAO_ENCONTRADA));
         category.setName(data.name());
         category.setDescription(data.description());
         repository.save(category);
@@ -46,7 +48,7 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public void deleteCategory(@PathVariable Long id) {
         Category category = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CAT_NAO_ENCONTRADA));
         category.setActive(false);
         repository.save(category);
     }

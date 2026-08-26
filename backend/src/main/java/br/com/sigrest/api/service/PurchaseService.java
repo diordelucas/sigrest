@@ -9,6 +9,8 @@ import br.com.sigrest.api.entity.Product;
 import br.com.sigrest.api.entity.Purchase;
 import br.com.sigrest.api.entity.PurchaseItem;
 import br.com.sigrest.api.entity.Supplier;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.ProductRepository;
 import br.com.sigrest.api.repository.PurchaseRepository;
 import br.com.sigrest.api.repository.SupplierRepository;
@@ -41,13 +43,13 @@ public class PurchaseService {
         purchase.setDate(purchaseRequestDTO.getDate());
 
         Supplier supplier = supplierRepository.findById(purchaseRequestDTO.getSupplierId())
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SUPP_NAO_ENCONTRADO));
         purchase.setSupplier(supplier);
 
         BigDecimal total = BigDecimal.ZERO;
         for (var itemDTO : purchaseRequestDTO.getItems()) {
             Product product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found"));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO));
 
             PurchaseItem purchaseItem = new PurchaseItem();
             purchaseItem.setProduct(product);
@@ -94,7 +96,7 @@ public class PurchaseService {
     @Transactional(readOnly = true)
     public PurchaseResponseDTO getPurchaseById(Long id) {
         Purchase purchase = purchaseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Purchase not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PURCH_NAO_ENCONTRADA));
         return convertToResponseDTO(purchase);
     }
 

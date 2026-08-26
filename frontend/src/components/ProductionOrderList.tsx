@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, CheckCircle2, Plus, Search } from 'lucide-react';
-import api from '../services/api';
+import toast from 'react-hot-toast';
+import api, { getErrorMessage } from '../services/api';
 import moment from 'moment';
 import { ProductionOrder, ProductionOrderStatus } from '../types';
 
@@ -52,8 +53,7 @@ const ProductionOrderList = ({ refreshTrigger, onNewOrder }: ProductionOrderList
       const response = await api.get<ProductionOrder[]>('/production-order');
       setOrders(response.data);
     } catch (err) {
-      console.error(err);
-      setError('Erro ao carregar ordens de produção.');
+      setError(getErrorMessage(err, 'Erro ao carregar ordens de produção.'));
     } finally {
       setLoading(false);
     }
@@ -70,11 +70,8 @@ const ProductionOrderList = ({ refreshTrigger, onNewOrder }: ProductionOrderList
         setSuccessMessage('Ordem de Produção finalizada com sucesso!');
         setTimeout(() => setSuccessMessage(''), 4000);
         fetchOrders();
-      } catch (err: any) {
-        console.error(err);
-        const msg =
-          err.response?.data?.message || err.response?.data?.error || err.message || 'Erro de conexão com o servidor.';
-        alert('Erro ao finalizar ordem:\n' + msg);
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Erro ao finalizar ordem de produção.'));
       }
     }
   };
@@ -87,8 +84,7 @@ const ProductionOrderList = ({ refreshTrigger, onNewOrder }: ProductionOrderList
         setSuccessMessage('Ordem de Produção excluída com sucesso!');
         setTimeout(() => setSuccessMessage(''), 4000);
       } catch (err) {
-        console.error(err);
-        setError('Erro ao excluir ordem de produção.');
+        setError(getErrorMessage(err, 'Erro ao excluir ordem de produção.'));
       }
     }
   };

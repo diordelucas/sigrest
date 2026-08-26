@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { Sale } from '../types';
 
@@ -32,8 +32,8 @@ const SaleList = () => {
       try {
         const response = await api.get<Sale[]>('/sales');
         setSales(response.data);
-      } catch (err: any) {
-        setError('Erro ao carregar vendas: ' + err.message);
+      } catch (err) {
+        setError(getErrorMessage(err, 'Erro ao carregar vendas.'));
       } finally {
         setLoading(false);
       }

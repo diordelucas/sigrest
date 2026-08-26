@@ -1,7 +1,7 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { Supplier } from '../types';
 
 interface AccountPayableFormState {
@@ -27,7 +27,7 @@ const AccountPayableForm = () => {
     api
       .get<Supplier[]>('/supplier')
       .then((r) => setSuppliers(r.data))
-      .catch((err) => toast.error('Erro ao carregar fornecedores: ' + err.message))
+      .catch((err) => toast.error(getErrorMessage(err, 'Erro ao carregar fornecedores.')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -45,8 +45,8 @@ const AccountPayableForm = () => {
       });
       toast.success('Conta a pagar registrada com sucesso!');
       setAccountPayable({ description: '', amount: '', dueDate: '', supplierId: '' });
-    } catch (err: any) {
-      toast.error('Erro ao registrar: ' + (err.response?.data?.message || err.message));
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Erro ao registrar conta a pagar.'));
     } finally {
       setSubmitting(false);
     }

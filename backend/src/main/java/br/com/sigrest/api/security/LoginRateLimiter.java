@@ -1,7 +1,7 @@
 package br.com.sigrest.api.security;
 
 import br.com.sigrest.api.exception.BusinessException;
-import org.springframework.http.HttpStatus;
+import br.com.sigrest.api.exception.ErrorCode;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -44,8 +44,8 @@ public class LoginRateLimiter {
         if (now.isBefore(state.blockedUntil)) {
             long minutes = Math.max(1, Duration.between(now, state.blockedUntil).toMinutes() + 1);
             throw new BusinessException(
-                    "Muitas tentativas de login. Tente novamente em cerca de " + minutes + " minuto(s).",
-                    HttpStatus.TOO_MANY_REQUESTS);
+                    ErrorCode.AUTH_MUITAS_TENTATIVAS,
+                    "Muitas tentativas de login. Tente novamente em cerca de " + minutes + " minuto(s).");
         }
     }
 

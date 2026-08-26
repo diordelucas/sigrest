@@ -2,7 +2,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { Search } from 'lucide-react';
 import { IMaskInput } from 'react-imask';
 import axios from 'axios'; // ViaCEP: API pública de terceiros, não deve levar o token de autenticação
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import toast from 'react-hot-toast';
 import { CPF_MASK, PHONE_MASK, CEP_MASK } from '../utils/masks';
 import { Person } from '../types';
@@ -120,8 +120,8 @@ const PersonForm = ({ onUserAdded, editingPerson, onEditComplete }: PersonFormPr
         clearForm();
         onUserAdded();
       }
-    } catch {
-      toast.error(editingPerson ? 'Erro ao atualizar pessoa.' : 'Erro ao cadastrar pessoa.');
+    } catch (err) {
+      toast.error(getErrorMessage(err, editingPerson ? 'Erro ao atualizar pessoa.' : 'Erro ao cadastrar pessoa.'));
     }
   };
 

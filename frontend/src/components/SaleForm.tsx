@@ -2,7 +2,7 @@ import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { Person, Product } from '../types';
 
@@ -48,8 +48,8 @@ const SaleForm = () => {
         ]);
         setPeople(peopleRes.data);
         setProducts(productsRes.data);
-      } catch (err: any) {
-        toast.error('Erro ao carregar dados: ' + err.message);
+      } catch (err) {
+        toast.error(getErrorMessage(err, 'Erro ao carregar dados.'));
       } finally {
         setLoading(false);
       }
@@ -114,8 +114,8 @@ const SaleForm = () => {
       await api.post('/sales', saleToSubmit);
       toast.success('Venda registrada com sucesso!');
       navigate('/sales');
-    } catch (err: any) {
-      toast.error('Erro ao registrar venda: ' + (err.response?.data?.message || err.message));
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Erro ao registrar venda.'));
     } finally {
       setSubmitting(false);
     }

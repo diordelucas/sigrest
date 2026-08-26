@@ -13,6 +13,14 @@ export type ProductionOrderStatus = 'OPEN' | 'FINISHED' | 'CANCELLED';
 export type AccountPayableStatus = 'PENDING' | 'PAID' | 'OVERDUE';
 export type AccountReceivableStatus = 'PENDING' | 'RECEIVED' | 'OVERDUE';
 
+/** Espelha ErrorResponse do backend (br.com.sigrest.api.exception). */
+export interface ApiErrorResponse {
+  codigo: string;
+  message: string;
+  status: number;
+  timestamp: string;
+}
+
 export interface Category {
   id: number;
   name: string;

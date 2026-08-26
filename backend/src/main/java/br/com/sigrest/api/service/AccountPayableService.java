@@ -5,6 +5,8 @@ import br.com.sigrest.api.dto.AccountPayableResponseDTO;
 import br.com.sigrest.api.dto.SupplierResponseDTO;
 import br.com.sigrest.api.entity.AccountPayable;
 import br.com.sigrest.api.entity.Supplier;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.AccountPayableRepository;
 import br.com.sigrest.api.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ public class AccountPayableService {
     @Transactional
     public AccountPayableResponseDTO createAccountPayable(AccountPayableRequestDTO requestDTO) {
         Supplier supplier = supplierRepository.findById(requestDTO.getSupplierId())
-                .orElseThrow(() -> new RuntimeException("Fornecedor nÃ£o encontrado."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SUPP_NAO_ENCONTRADO));
 
         AccountPayable accountPayable = new AccountPayable();
         accountPayable.setDescription(requestDTO.getDescription());
@@ -43,10 +45,10 @@ public class AccountPayableService {
     @Transactional
     public AccountPayableResponseDTO payAccountPayable(Long id) {
         AccountPayable accountPayable = accountPayableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Conta a pagar nÃ£o encontrada."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAY_NAO_ENCONTRADA));
 
         if (accountPayable.getStatus() == AccountPayable.Status.PAID) {
-            throw new RuntimeException("Esta conta jÃ¡ foi paga.");
+            throw new BusinessException(ErrorCode.PAY_JA_PAGA);
         }
 
         accountPayable.setPaymentDate(LocalDate.now());
@@ -66,7 +68,7 @@ public class AccountPayableService {
     @Transactional(readOnly = true)
     public AccountPayableResponseDTO getAccountPayableById(Long id) {
         AccountPayable accountPayable = accountPayableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Conta a pagar não encontrada."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PAY_NAO_ENCONTRADA));
         return convertToResponseDTO(accountPayable);
     }
 

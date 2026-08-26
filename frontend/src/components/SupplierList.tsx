@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Search } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { Supplier } from '../types';
 
 interface SupplierListProps {
@@ -21,7 +21,7 @@ const SupplierList = ({ refreshTrigger, onEditSupplier, isReadOnly }: SupplierLi
       const response = await api.get<Supplier[]>('/supplier');
       setSuppliers(response.data);
     } catch (error) {
-      setError('Erro ao carregar fornecedores.');
+      setError(getErrorMessage(error, 'Erro ao carregar fornecedores.'));
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ const SupplierList = ({ refreshTrigger, onEditSupplier, isReadOnly }: SupplierLi
         await api.delete(`/supplier/${id}`);
         setSuppliers(suppliers.filter((s) => s.id !== id));
       } catch (error) {
-        setError('Erro ao excluir fornecedor.');
+        setError(getErrorMessage(error, 'Erro ao excluir fornecedor.'));
       }
     }
   };

@@ -1,5 +1,6 @@
 package br.com.sigrest.api.config;
 
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.exception.ErrorResponse;
 import br.com.sigrest.api.security.SecurityFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -61,19 +61,20 @@ public class WebSecurityConfig {
             )
             .exceptionHandling(ex -> ex
                     .authenticationEntryPoint((request, response, authException) ->
-                            writeError(response, HttpStatus.UNAUTHORIZED, "Sessao expirada ou ausente. Faca login novamente."))
+                            writeError(response, ErrorCode.AUTH_SESSAO_EXPIRADA))
                     .accessDeniedHandler((request, response, accessDeniedException) ->
-                            writeError(response, HttpStatus.FORBIDDEN, "Permissao insuficiente para esta operacao")))
+                            writeError(response, ErrorCode.AUTH_PERMISSAO_INSUFICIENTE)))
             .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-    private void writeError(jakarta.servlet.http.HttpServletResponse response, HttpStatus status, String message)
+    private void writeError(jakarta.servlet.http.HttpServletResponse response, ErrorCode code)
             throws IOException {
-        response.setStatus(status.value());
+        response.setStatus(code.getStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        objectMapper.writeValue(response.getWriter(), new ErrorResponse(message, status.value()));
+        objectMapper.writeValue(response.getWriter(),
+                new ErrorResponse(code.getCodigo(), code.getMensagemPadrao(), code.getStatus().value()));
     }
 
     @Bean

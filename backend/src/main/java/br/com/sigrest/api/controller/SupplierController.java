@@ -6,6 +6,8 @@ import br.com.sigrest.api.entity.Address;
 import br.com.sigrest.api.entity.City;
 import br.com.sigrest.api.entity.State;
 import br.com.sigrest.api.entity.Supplier;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -51,14 +53,14 @@ public class SupplierController {
     @GetMapping("/{id}")
     public SupplierResponseDTO getSupplierById(@PathVariable Long id) {
         Supplier supplier = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Fornecedor não encontrado"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SUPP_NAO_ENCONTRADO));
         return new SupplierResponseDTO(supplier);
     }
 
     @PutMapping("/{id}")
     public SupplierResponseDTO updateSupplier(@PathVariable Long id, @RequestBody SupplierRequestDTO data) {
         Supplier supplier = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Fornecedor não encontrado"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SUPP_NAO_ENCONTRADO));
 
         supplier.setName(data.name());
         supplier.setCnpj(data.cnpj());
@@ -91,7 +93,7 @@ public class SupplierController {
     @DeleteMapping("/{id}")
     public void deleteSupplier(@PathVariable Long id) {
         Supplier supplier = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Fornecedor não encontrado"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SUPP_NAO_ENCONTRADO));
         supplier.setActive(false);
         repository.save(supplier);
     }

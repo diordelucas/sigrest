@@ -7,6 +7,8 @@ import br.com.sigrest.api.dto.TechnicalSheetResponseDTO;
 import br.com.sigrest.api.entity.Product;
 import br.com.sigrest.api.entity.TechnicalSheet;
 import br.com.sigrest.api.entity.TechnicalSheetItem;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.ProductRepository;
 import br.com.sigrest.api.repository.TechnicalSheetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +40,7 @@ public class TechnicalSheetService {
     }
 
     private TechnicalSheet loadById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Ficha técnica não encontrada"));
+        return repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.TECH_FICHA_NAO_ENCONTRADA));
     }
 
     @Transactional
@@ -55,7 +57,7 @@ public class TechnicalSheetService {
         sheet.setDesiredMarginPercent(dto.desiredMarginPercent());
 
         Product finalProduct = productRepository.findById(dto.finalProductId())
-            .orElseThrow(() -> new RuntimeException("Produto final não encontrado"));
+            .orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO));
         sheet.setFinalProduct(finalProduct);
 
         if (sheet.getItems() == null) {
@@ -69,7 +71,7 @@ public class TechnicalSheetService {
                 TechnicalSheetItem item = new TechnicalSheetItem();
                 item.setTechnicalSheet(sheet);
                 item.setRawMaterial(productRepository.findById(itemDto.rawMaterialId())
-                    .orElseThrow(() -> new RuntimeException("Insumo não encontrado: " + itemDto.rawMaterialId())));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO, "Insumo não encontrado: " + itemDto.rawMaterialId())));
                 item.setQuantity(itemDto.quantity());
                 item.setUnit(itemDto.unit());
                 sheet.getItems().add(item);
@@ -81,7 +83,8 @@ public class TechnicalSheetService {
 
     @Transactional
     public void delete(Long id) {
-        repository.deleteById(id);
+        TechnicalSheet sheet = loadById(id);
+        repository.delete(sheet);
     }
 
     @Transactional(readOnly = true)

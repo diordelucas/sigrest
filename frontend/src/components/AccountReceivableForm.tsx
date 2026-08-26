@@ -1,7 +1,7 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { Person } from '../types';
 
 interface AccountReceivableFormState {
@@ -27,7 +27,7 @@ const AccountReceivableForm = () => {
     api
       .get<Person[]>('/person')
       .then((r) => setPeople(r.data))
-      .catch((err) => toast.error('Erro ao carregar clientes: ' + err.message))
+      .catch((err) => toast.error(getErrorMessage(err, 'Erro ao carregar clientes.')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -45,8 +45,8 @@ const AccountReceivableForm = () => {
       });
       toast.success('Conta a receber registrada com sucesso!');
       setAccountReceivable({ description: '', amount: '', dueDate: '', personId: '' });
-    } catch (err: any) {
-      toast.error('Erro ao registrar: ' + (err.response?.data?.message || err.message));
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Erro ao registrar conta a receber.'));
     } finally {
       setSubmitting(false);
     }

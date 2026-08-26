@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, CheckCircle2, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { AccountReceivable, AccountReceivableStatus } from '../types';
 
@@ -47,8 +47,8 @@ const AccountReceivableList = () => {
       try {
         const response = await api.get<AccountReceivable[]>('/accounts-receivable');
         setAccounts(response.data);
-      } catch (err: any) {
-        setError('Erro ao carregar contas a receber: ' + err.message);
+      } catch (err) {
+        setError(getErrorMessage(err, 'Erro ao carregar contas a receber.'));
       } finally {
         setLoading(false);
       }
@@ -60,8 +60,8 @@ const AccountReceivableList = () => {
     try {
       await api.put(`/accounts-receivable/receive/${id}`);
       setRefreshTrigger((prev) => prev + 1);
-    } catch (err: any) {
-      setError('Erro ao receber conta: ' + (err.response?.data?.message || err.message));
+    } catch (err) {
+      setError(getErrorMessage(err, 'Erro ao receber conta.'));
     }
   };
 

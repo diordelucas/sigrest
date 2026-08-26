@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ReactNode } from 'react';
 import { DollarSign, ShoppingCart, TrendingUp, AlertTriangle, ArrowUpCircle, ArrowDownCircle, Scale } from 'lucide-react';
-import api from '../services/api';
+import toast from 'react-hot-toast';
+import api, { getErrorMessage } from '../services/api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import moment from 'moment';
 import { formatBRL } from '../utils/currency';
@@ -51,9 +52,9 @@ const Dashboard = () => {
       try {
         const { data } = await api.get<DashboardSummary>('/dashboard/summary');
         setSummary(data);
-      } catch (err: any) {
-        // keep zeroed defaults — never blank the screen
-        console.error('Falha ao carregar KPIs do dashboard:', err.message);
+      } catch (err) {
+        // keep zeroed defaults — never blank the screen, but tell the user why they're zero
+        toast.error(getErrorMessage(err, 'Não foi possível carregar os indicadores do dashboard.'));
       }
 
       // Charts: allSettled so one failing report doesn't wipe out the others.

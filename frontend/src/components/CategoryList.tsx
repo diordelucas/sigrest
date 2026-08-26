@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Trash2, Search } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { Category } from '../types';
 
 interface CategoryListProps {
@@ -21,7 +21,7 @@ const CategoryList = ({ refreshTrigger, onEditCategory, isReadOnly }: CategoryLi
       const response = await api.get<Category[]>('/category');
       setCategories(response.data);
     } catch (error) {
-      setError('Erro ao carregar categorias.');
+      setError(getErrorMessage(error, 'Erro ao carregar categorias.'));
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ const CategoryList = ({ refreshTrigger, onEditCategory, isReadOnly }: CategoryLi
         await api.delete(`/category/${id}`);
         setCategories(categories.filter((c) => c.id !== id));
       } catch (error) {
-        setError('Erro ao excluir categoria.');
+        setError(getErrorMessage(error, 'Erro ao excluir categoria.'));
       }
     }
   };

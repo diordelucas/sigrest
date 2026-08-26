@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { ArrowLeft, Save } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { TechnicalSheet } from '../types';
 
 interface ProductionOrderFormProps {
@@ -25,8 +25,7 @@ const ProductionOrderForm = ({ onSaveSuccess, onCancel }: ProductionOrderFormPro
       const response = await api.get<TechnicalSheet[]>('/technical-sheet');
       setSheets(response.data);
     } catch (err) {
-      console.error('Erro ao carregar fichas técnicas:', err);
-      setError('Erro ao carregar fichas técnicas. Certifique-se de que existem receitas cadastradas.');
+      setError(getErrorMessage(err, 'Erro ao carregar fichas técnicas. Certifique-se de que existem receitas cadastradas.'));
     }
   };
 
@@ -47,9 +46,8 @@ const ProductionOrderForm = ({ onSaveSuccess, onCancel }: ProductionOrderFormPro
     try {
       await api.post('/production-order', data);
       onSaveSuccess();
-    } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.message || 'Erro ao abrir ordem de produção.');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Erro ao abrir ordem de produção.'));
     } finally {
       setLoading(false);
     }

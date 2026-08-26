@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, FormEvent } from 'react';
 import toast from 'react-hot-toast';
 import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import CurrencyInput from './CurrencyInput';
 import { formatBRL } from '../utils/currency';
@@ -33,8 +33,8 @@ const CashRegisterForm = () => {
       const response = await api.get<CashRegister>('/cash-registers/current-open');
       setCurrentCashRegister(response.data || null);
       return response.data || null;
-    } catch (err: any) {
-      toast.error('Erro ao carregar status do caixa: ' + (err.response?.data?.message || err.message));
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Erro ao carregar status do caixa.'));
       return null;
     }
   }, []);
@@ -93,8 +93,8 @@ const CashRegisterForm = () => {
         setMovements([]);
         toast.success('Caixa fechado com sucesso!');
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao processar a operação de caixa.');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Erro ao processar a operação de caixa.'));
     } finally {
       setLoading(false);
     }
@@ -118,8 +118,8 @@ const CashRegisterForm = () => {
       setMovement(EMPTY_MOVEMENT);
       const updated = await fetchCashRegister();
       if (updated?.id) await fetchMovements(updated.id);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Erro ao registrar movimentação.');
+    } catch (err) {
+      toast.error(getErrorMessage(err, 'Erro ao registrar movimentação.'));
     } finally {
       setSubmittingMovement(false);
     }

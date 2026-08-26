@@ -5,10 +5,10 @@ import br.com.sigrest.api.dto.ProductResponseDTO;
 import br.com.sigrest.api.entity.Category;
 import br.com.sigrest.api.entity.Product;
 import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.CategoryRepository;
 import br.com.sigrest.api.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +27,10 @@ public class ProductController {
     /** Garante que a categoria foi informada e existe. Categoria é obrigatória no produto. */
     private void validateCategory(Long categoryId) {
         if (categoryId == null) {
-            throw new BusinessException("A categoria do produto é obrigatória.", HttpStatus.BAD_REQUEST);
+            throw new BusinessException(ErrorCode.PROD_CATEGORIA_OBRIGATORIA);
         }
         if (!categoryRepository.existsById(categoryId)) {
-            throw new BusinessException("Categoria informada não encontrada.", HttpStatus.NOT_FOUND);
+            throw new BusinessException(ErrorCode.CAT_NAO_ENCONTRADA);
         }
     }
 
@@ -58,7 +58,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ProductResponseDTO getProductById(@PathVariable Long id){
-        Product product = repository.findById(id).orElseThrow(() -> new BusinessException("Produto não encontrado.", HttpStatus.NOT_FOUND));
+        Product product = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO));
         return new ProductResponseDTO(product);
     }
 
@@ -66,7 +66,7 @@ public class ProductController {
     public ProductResponseDTO updatePerson(@PathVariable Long id, @RequestBody ProductRequestDTO data) {
         validateCategory(data.categoryId());
 
-        Product product = repository.findById(id).orElseThrow(() -> new BusinessException("Produto não encontrado.", HttpStatus.NOT_FOUND));
+        Product product = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO));
         product.setName(data.name());
         product.setCode(data.code());
         product.setStorage(data.storage());
@@ -95,7 +95,7 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
         Product product = repository.findById(id)
-                .orElseThrow(() -> new BusinessException("Produto não encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO));
         product.setActive(false);
         repository.save(product);
     }

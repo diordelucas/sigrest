@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { Category } from '../types';
 
 interface CategoryFormProps {
@@ -40,8 +40,7 @@ const CategoryForm = ({ onCategoryAdded, editingCategory, onEditComplete }: Cate
         onCategoryAdded();
       }
     } catch (error) {
-      setError(editingCategory ? 'Erro ao atualizar.' : 'Erro ao cadastrar.');
-      console.error(error);
+      setError(getErrorMessage(error, editingCategory ? 'Erro ao atualizar categoria.' : 'Erro ao cadastrar categoria.'));
     }
   };
 

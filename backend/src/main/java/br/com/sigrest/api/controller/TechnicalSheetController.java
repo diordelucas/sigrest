@@ -5,6 +5,7 @@ import br.com.sigrest.api.dto.TechnicalSheetRequestDTO;
 import br.com.sigrest.api.dto.TechnicalSheetResponseDTO;
 import br.com.sigrest.api.service.TechnicalSheetService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +46,8 @@ public class TechnicalSheetController {
         return service.save(dto);
     }
 
+    /** Exclusao de ficha tecnica e privilegio de administrador (mesmo padrao de ProductController). */
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         service.delete(id);

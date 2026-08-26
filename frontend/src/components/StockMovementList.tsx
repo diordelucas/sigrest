@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import CategoryTag from './CategoryTag';
 import { Search } from 'lucide-react';
 import { StockMovement } from '../types';
@@ -15,8 +15,8 @@ const StockMovementList = () => {
       try {
         const response = await api.get<StockMovement[]>('/stock-movements');
         setMovements(response.data);
-      } catch (err: any) {
-        setError('Erro ao carregar movimentações de estoque: ' + err.message);
+      } catch (err) {
+        setError(getErrorMessage(err, 'Erro ao carregar movimentações de estoque.'));
       } finally {
         setLoading(false);
       }

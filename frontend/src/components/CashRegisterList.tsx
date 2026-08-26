@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { formatBRL } from '../utils/currency';
 import { CashRegister } from '../types';
 
@@ -15,8 +15,8 @@ const CashRegisterList = () => {
       try {
         const response = await api.get<CashRegister[]>('/cash-registers');
         setCashRegisters(response.data);
-      } catch (err: any) {
-        setError('Erro ao carregar caixas: ' + err.message);
+      } catch (err) {
+        setError(getErrorMessage(err, 'Erro ao carregar caixas.'));
       } finally {
         setLoading(false);
       }

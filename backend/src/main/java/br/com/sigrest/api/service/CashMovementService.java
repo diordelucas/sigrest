@@ -6,6 +6,8 @@ import br.com.sigrest.api.dto.UserResponseDTO;
 import br.com.sigrest.api.entity.CashMovement;
 import br.com.sigrest.api.entity.CashRegister;
 import br.com.sigrest.api.entity.User;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.CashMovementRepository;
 import br.com.sigrest.api.repository.CashRegisterRepository;
 import br.com.sigrest.api.repository.UserRepository;
@@ -33,14 +35,14 @@ public class CashMovementService {
     @Transactional
     public CashMovementResponseDTO createCashMovement(CashMovementRequestDTO requestDTO) {
         CashRegister cashRegister = cashRegisterRepository.findById(requestDTO.getCashRegisterId())
-                .orElseThrow(() -> new RuntimeException("Caixa não encontrado."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CASH_NAO_ENCONTRADO));
 
         if (!cashRegister.isOpen()) {
-            throw new RuntimeException("O caixa não está aberto para registrar movimentações.");
+            throw new BusinessException(ErrorCode.CASH_NAO_ABERTO);
         }
 
         User user = userRepository.findById(requestDTO.getUserId())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NAO_ENCONTRADO));
 
         CashMovement cashMovement = new CashMovement();
         cashMovement.setCashRegister(cashRegister);

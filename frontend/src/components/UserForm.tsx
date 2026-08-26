@@ -1,5 +1,5 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import api from '../services/api';
+import api, { getErrorMessage } from '../services/api';
 import { User, UserRole } from '../types';
 
 interface UserFormProps {
@@ -44,8 +44,7 @@ const UserForm = ({ onUserAdded, editingUser, onEditComplete }: UserFormProps) =
         onUserAdded();
       }
     } catch (error) {
-      setError(editingUser ? 'Erro ao atualizar.' : 'Erro ao cadastrar.');
-      console.error(error);
+      setError(getErrorMessage(error, editingUser ? 'Erro ao atualizar usuário.' : 'Erro ao cadastrar usuário.'));
     }
   };
 

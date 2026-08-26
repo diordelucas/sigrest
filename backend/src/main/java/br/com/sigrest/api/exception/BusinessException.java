@@ -3,26 +3,31 @@ package br.com.sigrest.api.exception;
 import org.springframework.http.HttpStatus;
 
 /**
- * Exception for business/domain rule violations (e.g. "a cash register is already open").
+ * Exceção para violação de regra de negócio (ex.: "já existe um caixa aberto").
  *
- * <p>Carries the HTTP status that should be returned to the client, so the
- * {@link GlobalExceptionHandler} can translate it into a clear, user-facing response.
+ * <p>Carrega um {@link ErrorCode}, que já define a mensagem padrão e o status HTTP. Use o
+ * construtor com {@code mensagemDetalhada} apenas quando a mensagem precisa de um dado dinâmico
+ * (ex.: o nome do produto sem estoque) — o código continua o mesmo, só o texto muda.
  */
 public class BusinessException extends RuntimeException {
 
-    private final HttpStatus status;
+    private final ErrorCode code;
 
-    public BusinessException(String message, HttpStatus status) {
-        super(message);
-        this.status = status;
+    public BusinessException(ErrorCode code) {
+        super(code.getMensagemPadrao());
+        this.code = code;
     }
 
-    /** Convenience constructor defaulting to 400 Bad Request. */
-    public BusinessException(String message) {
-        this(message, HttpStatus.BAD_REQUEST);
+    public BusinessException(ErrorCode code, String mensagemDetalhada) {
+        super(mensagemDetalhada);
+        this.code = code;
+    }
+
+    public ErrorCode getCode() {
+        return code;
     }
 
     public HttpStatus getStatus() {
-        return status;
+        return code.getStatus();
     }
 }

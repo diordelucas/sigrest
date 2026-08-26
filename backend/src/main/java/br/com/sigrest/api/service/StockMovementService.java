@@ -5,6 +5,8 @@ import br.com.sigrest.api.dto.StockMovementResponseDTO;
 import br.com.sigrest.api.dto.ProductResponseDTO;
 import br.com.sigrest.api.entity.Product;
 import br.com.sigrest.api.entity.StockMovement;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.ProductRepository;
 import br.com.sigrest.api.repository.StockMovementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ public class StockMovementService {
     @Transactional
     public StockMovementResponseDTO createStockMovement(StockMovementRequestDTO requestDTO) {
         Product product = productRepository.findById(requestDTO.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO));
 
         StockMovement stockMovement = new StockMovement();
         stockMovement.setProduct(product);
@@ -75,7 +77,7 @@ public class StockMovementService {
             product.setStorage(current.add(quantity));
         } else if (type == StockMovement.MovementType.EXIT) {
             if (current.compareTo(quantity) < 0) {
-                throw new RuntimeException("Estoque insuficiente para o produto: " + product.getName());
+                throw new BusinessException(ErrorCode.STOCK_INSUFICIENTE, "Estoque insuficiente para o produto: " + product.getName());
             }
             product.setStorage(current.subtract(quantity));
         }
@@ -90,7 +92,7 @@ public class StockMovementService {
 
     public StockMovementResponseDTO getStockMovementById(Long id) {
         StockMovement stockMovement = stockMovementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Stock Movement not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STOCK_MOVIMENTO_NAO_ENCONTRADO));
         return convertToResponseDTO(stockMovement);
     }
 

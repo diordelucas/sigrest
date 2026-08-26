@@ -6,6 +6,8 @@ import br.com.sigrest.api.entity.Address;
 import br.com.sigrest.api.entity.City;
 import br.com.sigrest.api.entity.Person;
 import br.com.sigrest.api.entity.State;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +54,7 @@ public class PersonController {
 
     @GetMapping("/{id}")
     public PersonResponseDTO getPersonById(@PathVariable Long id){
-        Person person = repository.findById(id).orElseThrow(() -> new RuntimeException("Pessoa nÃ£o encontrada"));
+        Person person = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.PERSON_NAO_ENCONTRADA));
         return new PersonResponseDTO(person);
     }
 
@@ -67,7 +69,7 @@ public class PersonController {
 
     @PutMapping("/{id}")
     public PersonResponseDTO updatePerson(@PathVariable Long id, @RequestBody PersonRequestDTO data) {
-        Person person = repository.findById(id).orElseThrow(() -> new RuntimeException("Pessoa nÃ£o encontrada"));
+        Person person = repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.PERSON_NAO_ENCONTRADA));
         person.setName(data.name());
         person.setCpf(data.cpf());
         person.setEmail(data.email());
@@ -106,7 +108,7 @@ public class PersonController {
     @DeleteMapping("/{id}")
     public void deletePerson(@PathVariable Long id) {
         Person person = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pessoa não encontrada"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PERSON_NAO_ENCONTRADA));
         person.setActive(false);
         repository.save(person);
     }

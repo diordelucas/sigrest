@@ -5,6 +5,8 @@ import br.com.sigrest.api.entity.Product;
 import br.com.sigrest.api.entity.ProductionOrder;
 import br.com.sigrest.api.entity.TechnicalSheet;
 import br.com.sigrest.api.entity.TechnicalSheetItem;
+import br.com.sigrest.api.exception.BusinessException;
+import br.com.sigrest.api.exception.ErrorCode;
 import br.com.sigrest.api.repository.ProductRepository;
 import br.com.sigrest.api.repository.ProductionOrderRepository;
 import br.com.sigrest.api.repository.TechnicalSheetRepository;
@@ -38,7 +40,7 @@ public class ProductionOrderService {
 
     @Transactional(readOnly = true)
     public ProductionOrder findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException("Ordem de Produção não encontrada"));
+        return repository.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.PORD_NAO_ENCONTRADA));
     }
 
     @Transactional
@@ -52,7 +54,7 @@ public class ProductionOrderService {
         }
 
         Product finalProduct = productRepository.findById(dto.finalProductId())
-                .orElseThrow(() -> new RuntimeException("Produto final não encontrado"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PROD_NAO_ENCONTRADO));
 
         order.setFinalProduct(finalProduct);
         order.setQuantity(dto.quantity());
@@ -66,19 +68,20 @@ public class ProductionOrderService {
         ProductionOrder order = findById(id);
 
         if (order.getStatus() == ProductionOrder.Status.FINISHED) {
-            throw new RuntimeException("Ordem de produção já foi finalizada.");
+            throw new BusinessException(ErrorCode.PORD_JA_FINALIZADA);
         }
         if (order.getStatus() == ProductionOrder.Status.CANCELLED) {
-            throw new RuntimeException("Ordem de produção está cancelada.");
+            throw new BusinessException(ErrorCode.PORD_CANCELADA);
         }
 
         Product finalProduct = order.getFinalProduct();
         if (finalProduct == null) {
-            throw new RuntimeException("Produto final não associado à Ordem de Produção.");
+            throw new BusinessException(ErrorCode.PORD_PRODUTO_NAO_ASSOCIADO);
         }
 
         TechnicalSheet sheet = technicalSheetRepository.findByFinalProductId(finalProduct.getId())
-                .orElseThrow(() -> new RuntimeException("Ficha técnica não encontrada para o produto final: " + finalProduct.getName()));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PORD_SEM_FICHA_TECNICA,
+                        "Ficha técnica não encontrada para o produto final: " + finalProduct.getName()));
 
         // 1. Calcular total necessário por insumo (em unidade base) e validar estoque
         for (TechnicalSheetItem item : sheet.getItems()) {
@@ -88,7 +91,7 @@ public class ProductionOrderService {
             BigDecimal currentStock = rawMaterial.getStorage() != null ? rawMaterial.getStorage() : BigDecimal.ZERO;
             if (currentStock.compareTo(totalNeeded) < 0) {
                 String unit = item.getUnit() != null ? item.getUnit().getBaseUnitLabel() : "un";
-                throw new RuntimeException("Estoque insuficiente para o insumo: " + rawMaterial.getName()
+                throw new BusinessException(ErrorCode.STOCK_INSUFICIENTE, "Estoque insuficiente para o insumo: " + rawMaterial.getName()
                         + " (Necessário: " + totalNeeded + " " + unit
                         + ", Disponível: " + currentStock + " " + unit + ")");
             }
@@ -112,7 +115,8 @@ public class ProductionOrderService {
 
     @Transactional
     public void delete(Long id) {
-        repository.deleteById(id);
+        ProductionOrder order = findById(id);
+        repository.delete(order);
     }
 
     /**
